@@ -11,7 +11,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
-
+use App\Mail\WelcomeUserMail;
+use App\Mail\NewUserAdminMail;
+use Illuminate\Support\Facades\Mail;
 class RegisteredUserController extends Controller
 {
     /**
@@ -36,15 +38,23 @@ class RegisteredUserController extends Controller
         ]);
 
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
+            'name'     => $request->name,
+            'email'    => $request->email,
             'password' => Hash::make($request->password),
+            'balance'  => 0.00,          // start with zero balance
+            'role'     => 'user',        // default role
         ]);
 
         event(new Registered($user));
 
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        // Queue Welcome Mail to User
+    Mail::to($user->email)->queue(new WelcomeUserMail($user));
+
+    // Queue Notification Mail to Admin
+    Mail::to('admin@example.com')->queue(new NewUserAdminMail($user));
+
+        return redirect()->route('dashboard');
     }
 }

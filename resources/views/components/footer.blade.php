@@ -22,9 +22,9 @@
       <div>
         <h4 class="font-bold text-base lg:text-lg mb-3">Get Started</h4>
         <ul class="space-y-2">
-          <li><a href="#" class="hover:underline">Sign In</a></li>
-          <li><a href="#" class="hover:underline">Register</a></li>
-          <li><a href="#" class="hover:underline">How it works</a></li>
+          <li><a href="{{route('login')}}" class="hover:underline">Sign In</a></li>
+          <li><a href="{{route('register')}}" class="hover:underline">Register</a></li>
+          <li><a href="{{ route('how-it-works')}}" class="hover:underline">How it works</a></li>
         </ul>
       </div>
 
@@ -32,9 +32,9 @@
       <div>
         <h4 class="font-bold text-base lg:text-lg mb-3">Company</h4>
         <ul class="space-y-2">
-          <li><a href="#" class="hover:underline">About Us</a></li>
-          <li><a href="#" class="hover:underline">Contact Us</a></li>
-          <li><a href="#" class="hover:underline">Testimonies</a></li>
+        <li><a href="{{ route('about') }}" class="hover:underline">About Us</a></li>
+          <li><a href="{{ route('contact') }}" class="hover:underline">Contact Us</a></li>
+          <li><a href="{{ route('testimonies') }}" class="hover:underline">Testimonies</a></li>
         </ul>
       </div>
 

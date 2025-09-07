@@ -9,14 +9,31 @@
       <h2 class="text-3xl font-bold text-center mb-2">Login</h2>
       <p class="text-center text-sm mb-6">Please, enter your username and password</p>
 
-      <!-- Session Status -->
+    <!-- Session Status -->
       @if (session('status'))
         <div class="mb-4 p-3 bg-green-100 text-green-700 rounded-md text-sm">
           {{ session('status') }}
         </div>
       @endif
 
-      <form method="POST" action="{{ route('login') }}">
+      <!-- Error Messages -->
+      @if (session('error'))
+        <div class="mb-4 p-3 bg-red-100 text-red-700 rounded-md text-sm">
+          {{ session('error') }}
+        </div>
+      @endif
+
+      @if ($errors->any())
+        <div class="mb-4 p-3 bg-red-100 text-red-700 rounded-md text-sm">
+          <ul class="list-disc list-inside">
+            @foreach ($errors->all() as $error)
+              <li>{{ $error }}</li>
+            @endforeach
+          </ul>
+        </div>
+      @endif
+
+    <form method="POST" action="{{ route('login') }}">
         @csrf
 
         <!-- Email Input -->
@@ -52,7 +69,7 @@
           <label class="inline-flex items-center">
             <input type="checkbox" name="remember" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
             <span class="ml-2 text-sm text-gray-600">Remember me</span>
-          </label>
+            </label>
         </div>
 
         <!-- Login Button -->
@@ -81,7 +98,7 @@
   </section>
 
 
-</div>
+        </div>
 @include('components.footer')
 </body>
 </html>

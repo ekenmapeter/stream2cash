@@ -28,7 +28,7 @@
         <span class="border-b w-1/3"></span>
       </div>
 
-      <form method="POST" action="{{ route('register') }}">
+    <form method="POST" action="{{ route('register') }}">
         @csrf
 
         <!-- Name Input -->
@@ -88,7 +88,7 @@
     </div>
   </section>
 
-  </div>
+        </div>
 @include('components.footer')
 </body>
 </html>
