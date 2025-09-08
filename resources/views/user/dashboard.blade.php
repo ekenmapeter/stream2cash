@@ -126,20 +126,20 @@
         </div>
 
     <!-- Recent Tasks Sidebar (Right) -->
-        <aside class="w-full lg:w-96 flex-shrink-0  bg-blue-900 p-2 rounded-xl shadow-lg h-fit">
-            <header class="mb-4">
-                <h2 class="text-xl font-semibold text-white">Recent Tasks</h2>
-            </header>
-            <div class="space-y-4">
+<aside class="w-full lg:w-96 flex-shrink-0  bg-blue-900 p-2 rounded-xl shadow-lg h-fit">
+    <header class="mb-4">
+        <h2 class="text-xl font-semibold text-white">Recent Tasks</h2>
+    </header>
+    <div class="space-y-4">
                 @forelse($recent_tasks as $task)
-                <div class="flex items-center space-x-3 bg-white p-4 rounded-xl">
-                    <div class="flex-shrink-0">
+        <div class="flex items-center space-x-3 bg-white p-4 rounded-xl">
+            <div class="flex-shrink-0">
                         <img src="{{ $task->thumbnail_url ?? 'https://placehold.co/80x80/0000FF/FFFFFF?text=Video' }}" alt="Task thumbnail" class="w-20 h-20 rounded-md object-cover">
-                    </div>
-                    <div>
+            </div>
+            <div>
                         <div class="text-sm font-semibold text-blue-700">{{ $task->title }}</div>
                         <p class="text-xs text-gray-400 mt-1">{{ Str::limit($task->description, 50) }}</p>
-                        <div class="flex items-center justify-between mt-2">
+                <div class="flex items-center justify-between mt-2">
                             <span class="text-sm text-yellow-500 font-semibold">₦{{ number_format($task->reward_per_view, 2) }}</span>
                             @if(in_array($task->id, $user_completed_tasks->pluck('video_id')->toArray()))
                                 <span class="text-xs text-green-500 font-semibold">Completed</span>
@@ -155,11 +155,11 @@
                     <p>No tasks available</p>
                 </div>
                 @endforelse
-            </div>
-            <div class="text-right mt-4">
-                <a href="{{ route('user.tasks') }}" class="text-white font-bold hover:underline">View More</a>
-            </div>
-        </aside>
+    </div>
+    <div class="text-right mt-4">
+        <a href="{{ route('user.tasks') }}" class="text-white font-bold hover:underline">View More</a>
+    </div>
+</aside>
     </div>
     @include('user.components.footer_link')
 </main>

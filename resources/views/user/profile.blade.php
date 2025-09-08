@@ -41,7 +41,7 @@
                     <div class="flex"><span class="w-40 text-white/70">Bank Name</span> <span class="font-medium">{{ $lastWithdrawal->bank_name ?? '—' }}</span></div>
                     <div class="flex"><span class="w-40 text-white/70">Account Number</span> <span class="font-medium">{{ $lastWithdrawal->account_details ?? '—' }}</span></div>
                     <div class="flex"><span class="w-40 text-white/70">Account Name</span> <span class="font-medium">{{ $user->name }}</span></div>
-                </div>
+            </div>
             </div>
         </div>
         </div>
