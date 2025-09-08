@@ -10,8 +10,8 @@
         <h1 class="text-2xl font-bold mb-1">User Dashboard</h1>
         <p class="text-sm text-black">Welcome back, <span class="font-bold">{{ Auth::user()->name }}!</span> Here's your earning overview.</p>
     </header>
-    <div class="flex flex-col lg:flex-row  gap-2 bg-[#010E5C] rounded-lg lg:p-4 p-2">
-        <div>
+    <div class="flex flex-col lg:flex-row w-full gap-2 bg-[#010E5C] rounded-lg lg:p-4 p-2">
+        <div class="flex-1 w-full min-w-0">
     <!-- Stats Section -->
     <section class="grid grid-cols-2 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-4">
         <div class="bg-white p-2 rounded-xl flex items-center justify-between shadow-md">
@@ -62,15 +62,19 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($recent_history as $history)
+                    @forelse($recent_earnings as $earning)
                     <tr class="border-b border-gray-700 text-xs">
-                        <td class="py-3 px-4">{{ $history['name'] }}</td>
-                        <td class="py-3 px-4">{{ $history['description'] }}</td>
-                        <td class="py-3 px-4">₦ {{ $history['amount'] }}</td>
-                        <td class="py-3 px-4 {{ $history['status'] === 'Completed' ? 'text-green-400' : 'text-yellow-400' }}">{{ $history['status'] }}</td>
-                        <td class="py-3 px-4">{{ $history['date'] }}</td>
+                        <td class="py-3 px-4">Earning</td>
+                        <td class="py-3 px-4">{{ $earning->source ?? 'Task Completion' }}</td>
+                        <td class="py-3 px-4 text-green-400">+₦{{ number_format($earning->amount, 2) }}</td>
+                        <td class="py-3 px-4 text-green-400">Completed</td>
+                        <td class="py-3 px-4">{{ $earning->created_at->format('M d, Y') }}</td>
                     </tr>
-                    @endforeach
+                    @empty
+                    <tr>
+                        <td colspan="5" class="py-8 px-4 text-center text-gray-400">No recent earnings found</td>
+                    </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
@@ -96,18 +100,22 @@
                     </tr>
                 </thead>
                 <tbody>
+                    @forelse($recent_withdrawals as $withdrawal)
                     <tr class="border-b border-gray-700 text-xs">
-                        <td class="py-3 px-4">₦ 5,000</td>
-                        <td class="py-3 px-4">Bank Transfer</td>
-                        <td class="py-3 px-4 text-green-400">Completed</td>
-                        <td class="py-3 px-4">15/08/2025</td>
+                        <td class="py-3 px-4">₦{{ number_format($withdrawal->amount, 2) }}</td>
+                        <td class="py-3 px-4">{{ $withdrawal->method }}</td>
+                        <td class="py-3 px-4
+                            {{ $withdrawal->status === 'completed' ? 'text-green-400' :
+                               ($withdrawal->status === 'pending' ? 'text-yellow-400' : 'text-red-400') }}">
+                            {{ ucfirst($withdrawal->status) }}
+                        </td>
+                        <td class="py-3 px-4">{{ $withdrawal->requested_at->format('M d, Y') }}</td>
                     </tr>
-                    <tr class="border-b border-gray-700 text-xs">
-                        <td class="py-3 px-4">₦ 2,500</td>
-                        <td class="py-3 px-4">PayPal</td>
-                        <td class="py-3 px-4 text-yellow-400">Pending</td>
-                        <td class="py-3 px-4">18/08/2025</td>
+                    @empty
+                    <tr>
+                        <td colspan="4" class="py-8 px-4 text-center text-gray-400">No recent withdrawals found</td>
                     </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
@@ -118,34 +126,44 @@
         </div>
 
     <!-- Recent Tasks Sidebar (Right) -->
-<aside class="w-full lg:w-96 flex-shrink-0  bg-blue-900 p-2 rounded-xl shadow-lg h-fit">
-    <header class="mb-4">
-        <h2 class="text-xl font-semibold text-white">Recent Tasks</h2>
-    </header>
-    <div class="space-y-4">
-        @foreach($recent_tasks as $task)
-        <div class="flex items-center space-x-3 bg-white p-4 rounded-xl">
-            <div class="flex-shrink-0">
-                <img src="{{ $task['thumbnail'] }}" alt="Task thumbnail" class="w-20 h-20 rounded-md object-cover">
-            </div>
-            <div>
-                <div class="text-sm font-semibold text-blue-700">{{ $task['title'] }}</div>
-                <p class="text-xs text-gray-400 mt-1">{{ $task['description'] }}</p>
-                <div class="flex items-center justify-between mt-2">
-                    <span class="text-sm text-yellow-500 font-semibold">₪{{ $task['amount'] }}</span>
-                    <span class="text-xs {{ $task['status'] === 'Completed' ? 'text-green-500' : 'text-red-500' }} font-semibold">{{ $task['status'] }}</span>
+        <aside class="w-full lg:w-96 flex-shrink-0  bg-blue-900 p-2 rounded-xl shadow-lg h-fit">
+            <header class="mb-4">
+                <h2 class="text-xl font-semibold text-white">Recent Tasks</h2>
+            </header>
+            <div class="space-y-4">
+                @forelse($recent_tasks as $task)
+                <div class="flex items-center space-x-3 bg-white p-4 rounded-xl">
+                    <div class="flex-shrink-0">
+                        <img src="{{ $task->thumbnail_url ?? 'https://placehold.co/80x80/0000FF/FFFFFF?text=Video' }}" alt="Task thumbnail" class="w-20 h-20 rounded-md object-cover">
+                    </div>
+                    <div>
+                        <div class="text-sm font-semibold text-blue-700">{{ $task->title }}</div>
+                        <p class="text-xs text-gray-400 mt-1">{{ Str::limit($task->description, 50) }}</p>
+                        <div class="flex items-center justify-between mt-2">
+                            <span class="text-sm text-yellow-500 font-semibold">₦{{ number_format($task->reward_per_view, 2) }}</span>
+                            @if(in_array($task->id, $user_completed_tasks->pluck('video_id')->toArray()))
+                                <span class="text-xs text-green-500 font-semibold">Completed</span>
+                            @else
+                                <span class="text-xs text-red-500 font-semibold">Available</span>
+                            @endif
+                        </div>
+                    </div>
                 </div>
+                @empty
+                <div class="text-center py-8 text-gray-400">
+                    <i class="fa-solid fa-tasks text-4xl mb-2"></i>
+                    <p>No tasks available</p>
+                </div>
+                @endforelse
             </div>
-        </div>
-        @endforeach
-    </div>
-    <div class="text-right mt-4">
-        <a href="{{ route('user.tasks') }}" class="text-white font-bold hover:underline">View More</a>
-    </div>
-</aside>
+            <div class="text-right mt-4">
+                <a href="{{ route('user.tasks') }}" class="text-white font-bold hover:underline">View More</a>
+            </div>
+        </aside>
     </div>
     @include('user.components.footer_link')
 </main>
 
 
 @endsection
+

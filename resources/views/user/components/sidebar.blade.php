@@ -11,7 +11,21 @@
         <div class="p-6 text-2xl font-bold text-black text-center">
             Stream2Cash
         </div>
+            <!-- Impersonation Banner -->
+            @if(Auth::check() && Auth::user()->isImpersonated())
+            <div class="bg-purple-600 text-white py-2 px-4 text-center text-sm font-medium">
+              <div class="flex flex-col items-center justify-center gap-2">
 
+                <span><i class="fa-solid fa-user-secret"></i> You are being impersonated by an admin</span>
+                <form method="POST" action="{{ route('admin.stop-impersonate') }}" class="inline ml-4">
+                  @csrf
+                  <button type="submit" class="bg-purple-700 hover:bg-purple-800 px-3 py-1 rounded text-xs">
+                    <i class="fa-solid fa-times mr-1"></i>Stop Impersonation
+                  </button>
+                </form>
+              </div>
+            </div>
+          @endif
         <!-- Navigation Links -->
         <nav class="flex-grow p-4 space-y-2 text-black font-bold">
             @if(Auth::user()->role === 'admin')

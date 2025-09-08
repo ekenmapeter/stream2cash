@@ -6,7 +6,7 @@
   <!-- Login Form -->
   <section class="flex justify-center items-center py-20 px-4">
     <div class="bg-white text-black rounded-2xl shadow-lg w-full max-w-md p-8">
-      <h2 class="text-3xl font-bold text-center mb-2">Login</h2>
+      <h2 class="text-3xl font-bold text-center mb-2">{{ !empty($isAdmin) ? 'Admin Login' : 'Login' }}</h2>
       <p class="text-center text-sm mb-6">Please, enter your username and password</p>
 
     <!-- Session Status -->
@@ -33,7 +33,7 @@
         </div>
       @endif
 
-    <form method="POST" action="{{ route('login') }}">
+    <form method="POST" action="{{ !empty($isAdmin) ? route('admin.login.store') : route('login') }}">
         @csrf
 
         <!-- Email Input -->

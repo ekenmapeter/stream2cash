@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Lab404\Impersonate\Models\Impersonate;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, Impersonate;
 
     protected $fillable = [
         'name',
@@ -16,11 +17,21 @@ class User extends Authenticatable
         'password',
         'balance',
         'role',
+        'status',
+        'suspended_at',
+        'blocked_at',
+        'suspension_reason',
+        'block_reason',
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
+    ];
+
+    protected $casts = [
+        'suspended_at' => 'datetime',
+        'blocked_at' => 'datetime',
     ];
 
     // Relationships
@@ -47,6 +58,80 @@ class User extends Authenticatable
     public function referredBy()
     {
         return $this->hasOne(Referral::class, 'referee_id');
+    }
+
+    public function ipRecords()
+    {
+        return $this->hasMany(UserIpRecord::class);
+    }
+
+    // Status helper methods
+    public function isActive()
+    {
+        return $this->status === 'active';
+    }
+
+    public function isSuspended()
+    {
+        return $this->status === 'suspended';
+    }
+
+    public function isBlocked()
+    {
+        return $this->status === 'blocked';
+    }
+
+    public function canAccess()
+    {
+        return $this->isActive();
+    }
+
+    // Status management methods
+    public function suspend($reason = null)
+    {
+        $this->update([
+            'status' => 'suspended',
+            'suspended_at' => now(),
+            'suspension_reason' => $reason,
+        ]);
+    }
+
+    public function block($reason = null)
+    {
+        $this->update([
+            'status' => 'blocked',
+            'blocked_at' => now(),
+            'block_reason' => $reason,
+        ]);
+    }
+
+    public function activate()
+    {
+        $this->update([
+            'status' => 'active',
+            'suspended_at' => null,
+            'blocked_at' => null,
+            'suspension_reason' => null,
+            'block_reason' => null,
+        ]);
+    }
+
+    /**
+     * Check if user can be impersonated
+     */
+    public function canBeImpersonated()
+    {
+        // Only allow impersonating users (not admins)
+        return $this->role === 'user' && $this->isActive();
+    }
+
+    /**
+     * Check if user can impersonate others
+     */
+    public function canImpersonate()
+    {
+        // Only admins can impersonate
+        return $this->role === 'admin';
     }
 }
 

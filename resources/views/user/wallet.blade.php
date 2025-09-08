@@ -10,9 +10,11 @@
         <h1 class="text-2xl font-bold mb-1">Wallet</h1>
         <p class="text-sm text-gray-400">Manage your earnings and withdrawals</p>
     </header>
-    <div class="flex flex-col gap-2 bg-[#010E5C] rounded-lg lg:p-4 p-2">
+    <div class="flex flex-col lg:flex-row w-full gap-2 bg-[#010E5C] rounded-lg lg:p-4 p-2">
+    <!-- Left/Main Column -->
+    <section class="flex-1 w-full min-w-0">
     <!-- Wallet Balance Cards -->
-    <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-4 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-4 mb-6">
         <div class="bg-white p-6 rounded-xl flex items-center justify-between shadow-md">
             <div>
                 <div class="text-sm text-gray-400">Available Balance</div>
@@ -42,7 +44,7 @@
             </div>
         </div>
     </div>
-    </section>
+    </div>
 
     <!-- Quick Actions -->
     <section class="p-6 rounded-xl mb-6">
@@ -80,31 +82,39 @@
                     </tr>
                 </thead>
                 <tbody>
+                    @forelse($recent_earnings as $earning)
                     <tr class="border-b border-gray-700">
                         <td class="py-3 px-4 text-green-400">Earning</td>
-                        <td class="py-3 px-4">Video watch task completed</td>
-                        <td class="py-3 px-4 text-green-400">+₦100</td>
+                        <td class="py-3 px-4">{{ $earning->source ?? 'Task Completion' }}</td>
+                        <td class="py-3 px-4 text-green-400">+₦{{ number_format($earning->amount, 2) }}</td>
                         <td class="py-3 px-4 text-green-400">Completed</td>
-                        <td class="py-3 px-4">19/08/2025</td>
+                        <td class="py-3 px-4">{{ $earning->created_at->format('M d, Y') }}</td>
                     </tr>
+                    @empty
+                    <tr>
+                        <td colspan="5" class="py-6 px-4 text-center text-gray-300">No earnings yet</td>
+                    </tr>
+                    @endforelse
+
+                    @forelse($recent_withdrawals as $withdrawal)
                     <tr class="border-b border-gray-700">
                         <td class="py-3 px-4 text-red-400">Withdrawal</td>
-                        <td class="py-3 px-4">Bank transfer to account</td>
-                        <td class="py-3 px-4 text-red-400">-₦5,000</td>
-                        <td class="py-3 px-4 text-green-400">Completed</td>
-                        <td class="py-3 px-4">15/08/2025</td>
+                        <td class="py-3 px-4">{{ $withdrawal->method }}</td>
+                        <td class="py-3 px-4 text-red-400">-₦{{ number_format($withdrawal->amount, 2) }}</td>
+                        <td class="py-3 px-4 {{ $withdrawal->status === 'completed' ? 'text-green-400' : ($withdrawal->status === 'pending' ? 'text-yellow-400' : 'text-red-400') }}">{{ ucfirst($withdrawal->status) }}</td>
+                        <td class="py-3 px-4">{{ $withdrawal->requested_at->format('M d, Y') }}</td>
                     </tr>
-                    <tr class="border-b border-gray-700">
-                        <td class="py-3 px-4 text-green-400">Earning</td>
-                        <td class="py-3 px-4">Survey task completed</td>
-                        <td class="py-3 px-4 text-green-400">+₦75</td>
-                        <td class="py-3 px-4 text-green-400">Completed</td>
-                        <td class="py-3 px-4">18/08/2025</td>
+                    @empty
+                    <tr>
+                        <td colspan="5" class="py-6 px-4 text-center text-gray-300">No withdrawals yet</td>
                     </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
     </section>
+    </section>
+
     </div>
 </main>
 @endsection

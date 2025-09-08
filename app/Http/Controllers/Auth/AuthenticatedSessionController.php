@@ -20,6 +20,14 @@ class AuthenticatedSessionController extends Controller
     }
 
     /**
+     * Display the admin login view.
+     */
+    public function createAdmin(): View
+    {
+        return view('auth.login', ['isAdmin' => true]);
+    }
+
+    /**
      * Handle an incoming authentication request.
      */
     public function store(LoginRequest $request): RedirectResponse
@@ -29,6 +37,24 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
 
         return redirect()->intended(route('user.dashboard', absolute: false));
+    }
+
+    /**
+     * Handle admin authentication request.
+     */
+    public function storeAdmin(LoginRequest $request): RedirectResponse
+    {
+        $request->authenticate();
+
+        $request->session()->regenerate();
+
+        // Ensure only admins can proceed via admin login
+        if (Auth::user()?->role !== 'admin') {
+            Auth::logout();
+            return back()->withErrors(['email' => 'You are not authorized to access the admin area.']);
+        }
+
+        return redirect()->intended(route('admin.dashboard', absolute: false));
     }
 
     /**

@@ -3,6 +3,10 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Models\Video;
+use App\Models\Withdrawal;
+use App\Models\Earning;
+use App\Models\UserVideoWatch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -16,56 +20,47 @@ class UserController extends Controller
     {
         $user = Auth::user();
 
-        // Mock data - replace with actual data from database
+        // Get real user data from database
         $stats = [
-            'available_tasks' => 34,
-            'completed_tasks' => 4,
-            'withdrawals' => 15,
-            'wallet_balance' => 15000
+            'available_tasks' => Video::where('status', 'active')->count(),
+            'completed_tasks' => $user->watches()->count(),
+            'withdrawals' => $user->withdrawals()->count(),
+            'wallet_balance' => $user->balance
         ];
 
-        $recent_history = [
-            [
-                'name' => 'Join our Patreon',
-                'description' => 'Join our Patreon channel to get design',
-                'amount' => 100,
-                'status' => 'Completed',
-                'date' => '19/08/2025'
-            ],
-            [
-                'name' => 'Video Watch Task',
-                'description' => 'Watch 2-minute video and earn',
-                'amount' => 50,
-                'status' => 'Completed',
-                'date' => '18/08/2025'
-            ],
-            [
-                'name' => 'Survey Task',
-                'description' => 'Complete market research survey',
-                'amount' => 75,
-                'status' => 'Pending',
-                'date' => '17/08/2025'
-            ]
-        ];
+        // Get recent earnings (task completions)
+        $recent_earnings = $user->earnings()
+            ->with('user')
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
 
-        $recent_tasks = [
-            [
-                'title' => 'Video trash 2 min watch time generate',
-                'description' => 'Join our Patreon channel to getce AE files and design atreon.com',
-                'amount' => 100,
-                'status' => 'Not Completed',
-                'thumbnail' => 'https://placehold.co/80x80/0000FF/FFFFFF?text=Video'
-            ],
-            [
-                'title' => 'Survey completion task',
-                'description' => 'Complete a quick survey about your preferences',
-                'amount' => 50,
-                'status' => 'Completed',
-                'thumbnail' => 'https://placehold.co/80x80/00FF00/FFFFFF?text=Survey'
-            ]
-        ];
+        // Get recent withdrawals
+        $recent_withdrawals = $user->withdrawals()
+            ->orderBy('requested_at', 'desc')
+            ->take(5)
+            ->get();
 
-        return view('user.dashboard', compact('stats', 'recent_history', 'recent_tasks'));
+        // Get recent tasks (videos)
+        $recent_tasks = Video::where('status', 'active')
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+
+        // Get user's completed tasks
+        $user_completed_tasks = $user->watches()
+            ->with('video')
+            ->orderBy('watched_at', 'desc')
+            ->take(5)
+            ->get();
+
+        return view('user.dashboard', compact(
+            'stats',
+            'recent_earnings',
+            'recent_withdrawals',
+            'recent_tasks',
+            'user_completed_tasks'
+        ));
     }
 
     /**
@@ -75,15 +70,25 @@ class UserController extends Controller
     {
         $user = Auth::user();
 
-        // Mock data - replace with actual data from database
+        // Get real wallet data from database
         $wallet_data = [
-            'balance' => 15000,
-            'pending' => 500,
-            'total_earned' => 25000,
-            'total_withdrawn' => 10000
+            'balance' => $user->balance,
+            'pending' => $user->withdrawals()->where('status', 'pending')->sum('amount'),
+            'total_earned' => $user->earnings()->sum('amount'),
+            'total_withdrawn' => $user->withdrawals()->where('status', 'completed')->sum('amount')
         ];
 
-        return view('user.wallet', compact('wallet_data'));
+        $recent_withdrawals = $user->withdrawals()
+            ->orderBy('requested_at', 'desc')
+            ->take(10)
+            ->get();
+
+        $recent_earnings = $user->earnings()
+            ->orderBy('created_at', 'desc')
+            ->take(10)
+            ->get();
+
+        return view('user.wallet', compact('wallet_data', 'recent_withdrawals', 'recent_earnings'));
     }
 
     /**
@@ -93,27 +98,15 @@ class UserController extends Controller
     {
         $user = Auth::user();
 
-        // Mock data - replace with actual data from database
-        $tasks = [
-            [
-                'id' => 1,
-                'title' => 'Video Watch Task',
-                'description' => 'Watch a 2-minute video and earn money',
-                'amount' => 100,
-                'status' => 'Available',
-                'thumbnail' => 'https://placehold.co/300x200/0000FF/FFFFFF?text=Video'
-            ],
-            [
-                'id' => 2,
-                'title' => 'Survey Task',
-                'description' => 'Complete a market research survey',
-                'amount' => 75,
-                'status' => 'Available',
-                'thumbnail' => 'https://placehold.co/300x200/00FF00/FFFFFF?text=Survey'
-            ]
-        ];
+        // Get real tasks from database
+        $tasks = Video::where('status', 'active')
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
 
-        return view('user.tasks', compact('tasks'));
+        // Get user's completed task IDs
+        $completed_task_ids = $user->watches()->pluck('video_id')->toArray();
+
+        return view('user.tasks', compact('tasks', 'completed_task_ids'));
     }
 
     /**
@@ -122,7 +115,54 @@ class UserController extends Controller
     public function profile()
     {
         $user = Auth::user();
-        return view('user.profile', compact('user'));
+
+        $stats = [
+            'tasks_completed' => $user->watches()->count(),
+            'total_earned' => $user->earnings()->sum('amount'),
+            'withdrawals' => $user->withdrawals()->count(),
+        ];
+
+        $lastWithdrawal = $user->withdrawals()
+            ->orderByDesc('requested_at')
+            ->first();
+
+        // Build recent activities feed from earnings and withdrawals
+        $recentEarnings = $user->earnings()
+            ->select(['id', 'amount', 'created_at'])
+            ->orderByDesc('created_at')
+            ->take(10)
+            ->get()
+            ->map(function ($e) {
+                return [
+                    'type' => 'earning',
+                    'description' => 'Task reward',
+                    'amount' => $e->amount,
+                    'status' => 'completed',
+                    'date' => $e->created_at,
+                ];
+            });
+
+        $recentWithdrawals = $user->withdrawals()
+            ->select(['id', 'amount', 'status', 'requested_at', 'method'])
+            ->orderByDesc('requested_at')
+            ->take(10)
+            ->get()
+            ->map(function ($w) {
+                return [
+                    'type' => 'withdrawal',
+                    'description' => $w->method ?: 'Withdrawal',
+                    'amount' => $w->amount,
+                    'status' => $w->status,
+                    'date' => $w->requested_at,
+                ];
+            });
+
+        $activities = $recentEarnings
+            ->merge($recentWithdrawals)
+            ->sortByDesc('date')
+            ->values();
+
+        return view('user.profile', compact('user', 'stats', 'lastWithdrawal', 'activities'));
     }
 
     /**
@@ -132,11 +172,15 @@ class UserController extends Controller
     {
         $user = Auth::user();
 
-        // Mock data - replace with actual data from database
+        // Get real withdrawal data from database
         $withdrawal_data = [
-            'balance' => 15000,
-            'min_withdrawal' => 1000,
-            'withdrawal_methods' => ['Bank Transfer', 'PayPal', 'Mobile Money']
+            'balance' => $user->balance,
+            'min_withdrawal' => 1000, // You can make this configurable
+            'withdrawal_methods' => ['Bank Transfer', 'PayPal', 'Mobile Money'],
+            'recent_withdrawals' => $user->withdrawals()
+                ->orderBy('requested_at', 'desc')
+                ->take(10)
+                ->get()
         ];
 
         return view('user.withdrawal', compact('withdrawal_data'));

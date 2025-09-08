@@ -15,6 +15,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\CheckUserRole::class,
             'redirect.authenticated' => \App\Http\Middleware\RedirectIfAuthenticated::class,
             'redirect.dashboard' => \App\Http\Middleware\RedirectToDashboard::class,
+            'track.ip' => \App\Http\Middleware\TrackUserIp::class,
+            'check.status' => \App\Http\Middleware\CheckUserStatus::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
