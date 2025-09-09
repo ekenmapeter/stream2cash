@@ -186,11 +186,7 @@
                     <button onclick="showWatchDetails({{ $watch->id }})" class="text-blue-600 hover:text-blue-900">
                       <i class="fa-solid fa-eye"></i>
                     </button>
-                    @if(!$watch->earning && $watch->is_valid)
-                      <button onclick="creditReward({{ $watch->id }})" class="text-green-600 hover:text-green-900">
-                        <i class="fa-solid fa-money-bill-wave"></i>
-                      </button>
-                    @endif
+
                   </div>
                 </td>
               </tr>
