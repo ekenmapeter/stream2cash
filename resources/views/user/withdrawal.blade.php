@@ -69,31 +69,31 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr class="border-b border-blue-800">
-                        <td class="py-3 px-4 text-sm font-semibold text-red-400">₦5,000</td>
-                        <td class="py-3 px-4 text-sm">Bank Transfer</td>
-                        <td class="py-3 px-4 text-sm text-gray-400 hidden sm:table-cell">15/08/2025</td>
-                        <td class="py-3 px-4 text-sm text-right">
-                            <span class="px-2 py-1 rounded-full text-xs font-medium bg-green-700 text-green-100">Completed</span>
-                        </td>
-                    </tr>
-                    <tr class="border-b border-blue-800">
-                        <td class="py-3 px-4 text-sm font-semibold text-red-400">₦2,500</td>
-                        <td class="py-3 px-4 text-sm">PayPal</td>
-                        <td class="py-3 px-4 text-sm text-gray-400 hidden sm:table-cell">18/08/2025</td>
-                        <td class="py-3 px-4 text-sm text-right">
-                            <span class="px-2 py-1 rounded-full text-xs font-medium bg-yellow-700 text-yellow-100">Pending</span>
-                        </td>
-                    </tr>
-                    <tr class="border-b border-blue-800">
-                        <td class="py-3 px-4 text-sm font-semibold text-red-400">₦1,000</td>
-                        <td class="py-3 px-4 text-sm">Mobile Money</td>
-                        <td class="py-3 px-4 text-sm text-gray-400 hidden sm:table-cell">10/08/2025</td>
-                        <td class="py-3 px-4 text-sm text-right">
-                            <span class="px-2 py-1 rounded-full text-xs font-medium bg-red-700 text-red-100">Failed</span>
-                        </td>
-                    </tr>
-                    </tbody>
+                    @forelse($withdrawal_data['recent_withdrawals'] as $w)
+                        <tr class="border-b border-blue-800">
+                            <td class="py-3 px-4 text-sm font-semibold text-red-400">₦{{ number_format($w->amount, 0) }}</td>
+                            <td class="py-3 px-4 text-sm">{{ $w->method ?? 'Withdrawal' }}</td>
+                            <td class="py-3 px-4 text-sm text-gray-400 hidden sm:table-cell">{{ optional($w->requested_at)->format('d/m/Y') }}</td>
+                            <td class="py-3 px-4 text-sm text-right">
+                                @php
+                                    $status = strtolower($w->status ?? '');
+                                    $badge = match($status) {
+                                        'completed', 'approved' => 'bg-green-700 text-green-100',
+                                        'pending' => 'bg-yellow-700 text-yellow-100',
+                                        'failed', 'rejected' => 'bg-red-700 text-red-100',
+                                        default => 'bg-gray-600 text-gray-100'
+                                    };
+                                    $label = ucfirst($status ?: 'Unknown');
+                                @endphp
+                                <span class="px-2 py-1 rounded-full text-xs font-medium {{ $badge }}">{{ $label }}</span>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="4" class="py-4 px-4 text-center text-sm text-gray-300">No withdrawals yet.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
             </table>
         </div>
     </section>

@@ -98,12 +98,12 @@
 
                 <!-- Related Tasks -->
                 @if($relatedTasks->count() > 0)
-                <div class="bg-blue-800 rounded-xl shadow-lg p-6">
+                <div class="p-6">
                     <h3 class="text-lg font-semibold mb-4">Related Tasks</h3>
                     <div class="space-y-4">
                         @foreach($relatedTasks as $relatedTask)
                             @php $relatedCompleted = in_array($relatedTask->id, $completed_task_ids); @endphp
-                            <div class="flex items-center space-x-3 p-3 rounded-lg {{ $relatedCompleted ? 'bg-gray-700' : 'bg-gray-700 hover:bg-gray-600' }} transition-colors">
+                            <div class="flex items-center space-x-3 p-3 rounded-lg {{ $relatedCompleted ? 'bg-blue-700' : 'bg-blue-700 hover:bg-blue-600' }} transition-colors">
                                 <img src="{{ $relatedTask->thumbnail_url ?? $relatedTask->thumbnail ?? 'https://placehold.co/80x60/0000FF/FFFFFF?text=Video' }}"
                                      alt="{{ $relatedTask->title }}"
                                      class="w-16 h-12 object-cover rounded">

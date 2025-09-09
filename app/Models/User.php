@@ -6,6 +6,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Lab404\Impersonate\Models\Impersonate;
+use App\Models\Referral;
 
 class User extends Authenticatable
 {
@@ -22,6 +23,12 @@ class User extends Authenticatable
         'blocked_at',
         'suspension_reason',
         'block_reason',
+        'payout_method',
+        'bank_name',
+        'account_name',
+        'account_number',
+        'paypal_email',
+        'payout_meta',
     ];
 
     protected $hidden = [
@@ -32,6 +39,8 @@ class User extends Authenticatable
     protected $casts = [
         'suspended_at' => 'datetime',
         'blocked_at' => 'datetime',
+        'payout_meta' => 'array',
+        'last_login_at' => 'datetime',
     ];
 
     // Relationships

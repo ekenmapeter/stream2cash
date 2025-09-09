@@ -16,9 +16,9 @@
                 <div class="w-40 h-40 rounded-full bg-white/10 border-4 border-white/30 flex items-center justify-center overflow-hidden">
                     <i class="fa-solid fa-user text-6xl text-white/70"></i>
                 </div>
-                <button class="mt-4 bg-white text-blue-900 font-semibold py-2 px-6 rounded-lg shadow-md transition-colors hover:bg-gray-200">
+                <a href="{{ route('user.profile.edit') }}" class="mt-4 bg-white text-blue-900 font-semibold py-2 px-6 rounded-lg shadow-md transition-colors hover:bg-gray-200">
                     Edit Profile
-                </button>
+                </a>
             </div>
 
             <div class="flex-1 w-full grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-x-12">
@@ -53,15 +53,23 @@
                     <div class="space-y-3 text-sm">
                         <div class="flex flex-col sm:flex-row sm:items-center">
                             <span class="w-40 text-white/70 font-medium">Bank Name:</span>
-                            <span class="font-bold">{{ $lastWithdrawal->bank_name ?? '—' }}</span>
+                            <span class="font-bold">{{ $user->bank_name ?? '—' }}</span>
                         </div>
                         <div class="flex flex-col sm:flex-row sm:items-center">
                             <span class="w-40 text-white/70 font-medium">Account Number:</span>
-                            <span class="font-bold">{{ $lastWithdrawal->account_details ?? '—' }}</span>
+                            <span class="font-bold">{{ $user->account_number ?? '—' }}</span>
                         </div>
                         <div class="flex flex-col sm:flex-row sm:items-center">
                             <span class="w-40 text-white/70 font-medium">Account Name:</span>
                             <span class="font-bold">{{ $user->name }}</span>
+                        </div>
+                        <div class="flex flex-col sm:flex-row sm:items-center">
+                            <span class="w-40 text-white/70 font-medium">PayPal Email:</span>
+                            <span class="font-bold">{{ $user->paypal_email ?? '—' }}</span>
+                        </div>
+                        <div class="flex flex-col sm:flex-row sm:items-center">
+                            <span class="w-40 text-white/70 font-medium">Method:</span>
+                            <span class="font-bold">{{ ucfirst($user->payout_method ?? '—') }}</span>
                         </div>
                     </div>
                 </div>

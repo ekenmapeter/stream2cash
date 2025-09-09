@@ -102,10 +102,54 @@ class UserController extends Controller
     {
         $user = Auth::user();
 
-        // Get real tasks from database
-        $tasks = Video::where('status', 'active')
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+        // Filters & sorting
+        $sort = request('sort', 'latest'); // latest, oldest, reward_high, reward_low, views_high, views_low
+        $search = request('q');
+        $minReward = request('min_reward');
+        $maxReward = request('max_reward');
+
+        $query = Video::query()->where('status', 'active');
+
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        if ($minReward !== null && $minReward !== '') {
+            $query->where('reward_per_view', '>=', (float)$minReward);
+        }
+        if ($maxReward !== null && $maxReward !== '') {
+            $query->where('reward_per_view', '<=', (float)$maxReward);
+        }
+
+        // Views count
+        $query->withCount('watches');
+
+        // Sorting
+        switch ($sort) {
+            case 'oldest':
+                $query->orderBy('created_at', 'asc');
+                break;
+            case 'reward_high':
+                $query->orderBy('reward_per_view', 'desc');
+                break;
+            case 'reward_low':
+                $query->orderBy('reward_per_view', 'asc');
+                break;
+            case 'views_high':
+                $query->orderBy('watches_count', 'desc');
+                break;
+            case 'views_low':
+                $query->orderBy('watches_count', 'asc');
+                break;
+            case 'latest':
+            default:
+                $query->orderBy('created_at', 'desc');
+        }
+
+        $tasks = $query->paginate(10)->withQueryString();
 
         // Get user's completed task IDs
         $completed_task_ids = $user->watches()->pluck('video_id')->toArray();
@@ -230,6 +274,72 @@ class UserController extends Controller
             ->values();
 
         return view('user.profile', compact('user', 'stats', 'lastWithdrawal', 'activities'));
+    }
+
+    /**
+     * Edit profile form
+     */
+    public function editProfile()
+    {
+        $user = Auth::user();
+        return view('user.profile-edit', compact('user'));
+    }
+
+    /**
+     * Update profile
+     */
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::user();
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'password' => 'nullable|string|min:8|confirmed',
+            'payout_method' => 'nullable|in:bank,paypal,momo',
+            'bank_name' => 'nullable|string|max:255',
+            'account_name' => 'nullable|string|max:255',
+            'account_number' => 'nullable|string|max:255',
+            'paypal_email' => 'nullable|email|max:255',
+        ]);
+
+        $user->name = $validated['name'];
+        //$user->username = $validated['username'] ?? $user->username;
+        //$user->email = $validated['email'];
+        if (!empty($validated['password'])) {
+            $user->password = \Illuminate\Support\Facades\Hash::make($validated['password']);
+        }
+        $user->payout_method = $validated['payout_method'] ?? $user->payout_method;
+        $user->bank_name = $validated['bank_name'] ?? $user->bank_name;
+        $user->account_name = $validated['account_name'] ?? $user->account_name;
+        $user->account_number = $validated['account_number'] ?? $user->account_number;
+        $user->paypal_email = $validated['paypal_email'] ?? $user->paypal_email;
+
+        $user->save();
+
+        return redirect()->route('user.profile')->with('success', 'Profile updated successfully.');
+    }
+
+    /**
+     * Auto-generated avatar endpoint (SVG)
+     */
+    public function avatar(User $user)
+    {
+        $initials = collect(explode(' ', trim($user->name)))
+            ->filter()
+            ->map(fn($p) => strtoupper(mb_substr($p, 0, 1)))
+            ->take(2)
+            ->implode('');
+
+        $colors = ['#1D4ED8','#0EA5E9','#10B981','#F59E0B','#EF4444','#8B5CF6','#EC4899','#14B8A6'];
+        $hash = crc32(strtolower($user->email ?: $user->name));
+        $bg = $colors[$hash % count($colors)];
+
+        $svg = "<?xml version='1.0' encoding='UTF-8'?>\n".
+               "<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'>\n".
+               "<rect width='100%' height='100%' fill='{$bg}'/>\n".
+               "<text x='50%' y='50%' dy='.35em' text-anchor='middle' font-family='Inter,Arial' font-size='64' fill='white'>{$initials}</text>\n".
+               "</svg>";
+
+        return response($svg, 200, ['Content-Type' => 'image/svg+xml']);
     }
 
     /**

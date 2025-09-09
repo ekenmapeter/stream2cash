@@ -36,6 +36,14 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        // Track last login
+        if (Auth::check()) {
+            $user = Auth::user();
+            $user->last_login_at = now();
+            $user->last_login_ip = $request->ip();
+            $user->save();
+        }
+
         return redirect()->intended(route('user.dashboard', absolute: false));
     }
 
@@ -47,6 +55,14 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
 
         $request->session()->regenerate();
+
+        // Track last login for admin as well
+        if (Auth::check()) {
+            $user = Auth::user();
+            $user->last_login_at = now();
+            $user->last_login_ip = $request->ip();
+            $user->save();
+        }
 
         // Ensure only admins can proceed via admin login
         if (Auth::user()?->role !== 'admin') {

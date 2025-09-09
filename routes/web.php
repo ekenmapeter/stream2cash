@@ -25,6 +25,9 @@ Route::middleware(['auth', 'verified', 'role:user', 'check.status', 'track.ip'])
     Route::get('/tasks/{task}', [UserController::class, 'taskDetails'])->name('tasks.details');
     Route::get('/tasks/{task}/watch', [UserController::class, 'watchTask'])->name('tasks.watch');
     Route::get('/profile', [UserController::class, 'profile'])->name('profile');
+    Route::get('/profile/edit', [UserController::class, 'editProfile'])->name('profile.edit');
+    Route::post('/profile', [UserController::class, 'updateProfile'])->name('profile.update');
+    Route::get('/avatar/{user}', [UserController::class, 'avatar'])->name('avatar');
     Route::get('/withdrawal', [UserController::class, 'withdrawal'])->name('withdrawal');
 });
 
@@ -65,6 +68,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::post('/tasks', [AdminController::class, 'storeTask'])->name('tasks.store');
     Route::get('/tasks/{task}', [AdminController::class, 'showTask'])->name('tasks.show');
     Route::get('/tasks/{task}/watchers', [AdminController::class, 'taskWatchers'])->name('tasks.watchers');
+    Route::get('/watches/{watch}', [AdminController::class, 'watchDetails'])->name('watches.show');
+    Route::post('/watches/{watch}/credit', [AdminController::class, 'creditWatch'])->name('watches.credit');
     Route::patch('/tasks/{task}', [AdminController::class, 'updateTask'])->name('tasks.update');
     Route::delete('/tasks/{task}', [AdminController::class, 'deleteTask'])->name('tasks.delete');
     Route::patch('/tasks/{task}/toggle-status', [AdminController::class, 'toggleTaskStatus'])->name('tasks.toggle-status');

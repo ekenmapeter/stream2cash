@@ -4,8 +4,8 @@
 @section('title', 'Task Watchers: ' . $task->title)
 
 @section('content')
-<div class="pt-20">
-  <section class="flex justify-center items-center py-16 px-4">
+<div class="pt-0">
+  <section class="flex justify-center items-center py-8 px-4">
     <div class="bg-white text-black rounded-2xl shadow-lg w-full max-w-7xl p-8">
 
       <!-- Header -->
@@ -231,33 +231,116 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+// SweetAlert2 Toast helper
+function toast(type, title) {
+  if (window.Swal) {
+    return Swal.fire({toast:true, position:'top-end', showConfirmButton:false, timer:3000, icon:type, title});
+  } else {
+    alert(title);
+  }
+}
 function updateSort(param, value) {
   const url = new URL(window.location);
   url.searchParams.set(param, value);
   window.location = url;
 }
 
-function showWatchDetails(watchId) {
-  // This would typically make an AJAX call to get detailed watch data
-  document.getElementById('watchDetailsContent').innerHTML = `
+async function showWatchDetails(watchId) {
+  const contentEl = document.getElementById('watchDetailsContent');
+  contentEl.innerHTML = `
     <div class="text-center py-8">
       <i class="fa-solid fa-spinner fa-spin text-2xl text-gray-400 mb-4"></i>
       <p class="text-gray-600">Loading watch details...</p>
     </div>
   `;
   document.getElementById('watchDetailsModal').classList.remove('hidden');
+
+  try {
+    const res = await fetch(`{{ url('admin/watches') }}/${watchId}`, {headers: {'X-Requested-With':'XMLHttpRequest'}});
+    const json = await res.json();
+    if (!json.success) throw new Error('Failed to load');
+    const d = json.data;
+    contentEl.innerHTML = `
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <div class="text-sm text-gray-500">User</div>
+          <div class="font-semibold">${d.user.name} (${d.user.email})</div>
+        </div>
+        <div>
+          <div class="text-sm text-gray-500">Video</div>
+          <div class="font-semibold">${d.video.title}</div>
+        </div>
+        <div>
+          <div class="text-sm text-gray-500">Watch Duration</div>
+          <div class="font-semibold">${new Date(d.watch_duration * 1000).toISOString().substr(11,8)}</div>
+        </div>
+        <div>
+          <div class="text-sm text-gray-500">Watch %</div>
+          <div class="font-semibold">${Number(d.watch_percentage).toFixed(1)}%</div>
+        </div>
+        <div>
+          <div class="text-sm text-gray-500">Seeks / Pauses</div>
+          <div class="font-semibold">${d.seek_count} seeks, ${d.pause_count} pauses</div>
+        </div>
+        <div>
+          <div class="text-sm text-gray-500">Heartbeats</div>
+          <div class="font-semibold">${d.heartbeat_count}</div>
+        </div>
+        <div>
+          <div class="text-sm text-gray-500">Tab Visible</div>
+          <div class="font-semibold">${d.tab_visible ? 'Yes' : 'No'}</div>
+        </div>
+        <div>
+          <div class="text-sm text-gray-500">Valid</div>
+          <div class="font-semibold">${d.is_valid ? 'Valid' : 'Invalid'}</div>
+        </div>
+      </div>
+      ${Array.isArray(d.validation_notes) && d.validation_notes.length ? `<div class="mt-4">
+        <div class="text-sm text-gray-500 mb-1">Validation Notes</div>
+        <ul class="list-disc ml-5 text-sm text-gray-700">${d.validation_notes.map(n=>`<li>${n}</li>`).join('')}</ul>
+      </div>`: ''}
+      ${Array.isArray(d.watch_events) && d.watch_events.length ? `<div class="mt-4">
+        <div class="text-sm text-gray-500 mb-1">Watch Events</div>
+        <pre class="bg-gray-50 p-3 rounded text-xs overflow-x-auto">${JSON.stringify(d.watch_events, null, 2)}</pre>
+      </div>`: ''}
+    `;
+  } catch (e) {
+    contentEl.innerHTML = `<div class="text-red-600">Failed to load details.</div>`;
+    toast('error', 'Failed to load details');
+  }
 }
 
 function closeWatchDetails() {
   document.getElementById('watchDetailsModal').classList.add('hidden');
 }
 
-function creditReward(watchId) {
-  if (confirm('Are you sure you want to credit the reward for this watch?')) {
-    // This would typically make an AJAX call to credit the reward
-    alert('Reward credited successfully!');
-    location.reload();
+async function creditReward(watchId) {
+  if (!window.Swal) return;
+  const confirmRes = await Swal.fire({
+    title: 'Credit reward?',
+    text: 'This will create an earning for this user.',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, credit',
+  });
+  if (!confirmRes.isConfirmed) return;
+
+  try {
+    const res = await fetch(`{{ url('admin/watches') }}/${watchId}/credit`, {
+      method: 'POST',
+      headers: {
+        'X-CSRF-TOKEN': `{{ csrf_token() }}`,
+        'X-Requested-With':'XMLHttpRequest'
+      }
+    });
+    const json = await res.json();
+    if (!json.success) throw new Error(json.message || 'Failed');
+    await toast('success', json.message || 'Reward credited');
+    window.location.reload();
+  } catch (e) {
+    toast('error', e.message || 'Failed to credit');
   }
 }
 </script>

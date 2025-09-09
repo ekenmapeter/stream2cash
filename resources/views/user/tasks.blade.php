@@ -3,59 +3,88 @@
 @section('title', 'Tasks | Stream2Cash')
 
 @section('content')
-<!-- Main Content Area -->
-<main class="flex-grow">
-    <!-- Tasks Header -->
-    <header class="p-6 pt-0">
-        <h1 class="text-2xl font-bold mb-1">Available Tasks</h1>
-        <p class="text-sm text-gray-400">Complete tasks to earn money</p>
+<main class="flex-grow p-6">
+    <header class="mb-8">
+        <h1 class="text-3xl font-bold text-black mb-2">Available Tasks</h1>
+        <p class="text-black text-lg">Complete tasks to earn money.</p>
     </header>
 
-    <!-- Tasks Grid -->
-    <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+    <section class="mb-8 bg-blue-900 rounded-2xl p-4 shadow-xl">
+        <h2 class="text-sm font-semibold text-white mb-4">Filter & Sort Tasks</h2>
+        <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <input type="text" name="q" value="{{ request('q') }}" placeholder="Search title or description"
+                   class="w-full bg-white/10 text-white placeholder-white/50 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+
+            <input type="number" name="min_reward" value="{{ request('min_reward') }}" placeholder="Min reward"
+                   class="w-full bg-white/10 text-white placeholder-white/50 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+
+            <input type="number" name="max_reward" value="{{ request('max_reward') }}" placeholder="Max reward"
+                   class="w-full bg-white/10 text-white placeholder-white/50 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+
+            <select name="sort" class="w-full bg-white/10 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                <option value="latest" class="bg-blue-900" {{ request('sort','latest')==='latest'?'selected':'' }}>Latest</option>
+                <option value="oldest" class="bg-blue-900" {{ request('sort')==='oldest'?'selected':'' }}>Oldest</option>
+                <option value="reward_high" class="bg-blue-900" {{ request('sort')==='reward_high'?'selected':'' }}>Amount: High to Low</option>
+                <option value="reward_low" class="bg-blue-900" {{ request('sort')==='reward_low'?'selected':'' }}>Amount: Low to High</option>
+                <option value="views_high" class="bg-blue-900" {{ request('sort')==='views_high'?'selected':'' }}>Views: High to Low</option>
+                <option value="views_low" class="bg-blue-900" {{ request('sort')==='views_low'?'selected':'' }}>Views: Low to High</option>
+            </select>
+
+            <div class="md:col-span-4 flex gap-3 mt-2">
+                <button type="submit" class="w-full md:w-auto bg-blue-700 hover:bg-blue-600 text-white font-semibold px-6 py-3 rounded-lg transition-colors duration-200">
+                    <i class="fa-solid fa-filter mr-2"></i> Apply Filters
+                </button>
+                <a href="{{ route('user.tasks') }}" class="w-full md:w-auto bg-white/10 hover:bg-white/20 text-white font-semibold px-6 py-3 rounded-lg transition-colors duration-200 text-center">
+                    <i class="fa-solid fa-undo mr-2"></i> Reset
+                </a>
+            </div>
+        </form>
+    </section>
+
+    <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         @forelse($tasks as $task)
-        <div class="bg-blue-800 rounded-xl shadow-lg overflow-hidden">
+        <div class="bg-blue-900 rounded-2xl shadow-xl overflow-hidden transform hover:scale-105 transition-transform duration-300">
             @php $isCompleted = isset($completed_task_ids) && in_array($task->id, $completed_task_ids); @endphp
 
             @php
                 // Check if it's a YouTube URL
                 $isYouTube = preg_match('/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/', $task->url, $matches);
                 $youtubeId = $isYouTube ? $matches[1] : null;
-                $thumbnailUrl = $isYouTube ? "https://img.youtube.com/vi/{$youtubeId}/maxresdefault.jpg" : ($task->thumbnail_url ?? $task->thumbnail ?? 'https://placehold.co/600x300/0000FF/FFFFFF?text=Video');
+                $thumbnailUrl = $isYouTube ? "https://img.youtube.com/vi/{$youtubeId}/maxresdefault.jpg" : ($task->thumbnail_url ?? $task->thumbnail ?? 'https://placehold.co/600x300/1E3A8A/FFFFFF?text=Video');
             @endphp
 
             @if($isCompleted)
-                <!-- Completed state - show thumbnail -->
-                <img src="{{ $thumbnailUrl }}" alt="{{ $task->title }}" class="w-full h-48 object-cover">
-            @else
-                <!-- Active state - show video player -->
                 <div class="relative w-full h-48 bg-black">
-                    @if($isYouTube)
-                        <!-- YouTube Player -->
-                        <div id="youtube-player-{{ $task->id }}" class="w-full h-full" data-youtube-id="{{ $youtubeId }}"></div>
-                        <div id="youtube-loading-{{ $task->id }}" class="absolute inset-0 flex items-center justify-center bg-blue-800">
-                            <div class="text-center text-white">
-                                <i class="fa-solid fa-spinner fa-spin text-3xl mb-2"></i>
-                                <p>Loading video...</p>
-                            </div>
+                    <img src="{{ $thumbnailUrl }}" alt="{{ $task->title }}" class="w-full h-48 object-cover opacity-60" loading="lazy">
+                    <div class="absolute inset-0 flex flex-col items-center justify-center bg-black/60 text-white">
+                        <i class="fa-solid fa-check-circle text-6xl text-green-500 mb-4"></i>
+                        <span class="text-2xl font-bold">Task Completed!</span>
+                    </div>
+                </div>
+            @else
+                <div class="relative w-full h-48 bg-black">
+                    <div class="absolute inset-0 flex items-center justify-center text-white bg-black/40 pointer-events-none" data-lazy-overlay="{{ $task->id }}">
+                        <div class="flex flex-col items-center">
+                            <i class="fa-solid fa-spinner fa-spin text-4xl text-blue-500 mb-2"></i>
+                            <p class="text-sm">Preparing video...</p>
                         </div>
+                    </div>
+                    @if($isYouTube)
+                        <div id="youtube-player-{{ $task->id }}" class="w-full h-full lazy-youtube" data-youtube-id="{{ $youtubeId }}" data-task-id="{{ $task->id }}"></div>
                     @else
-                        <!-- HTML5 Video Player -->
                         <video
                             id="video-{{ $task->id }}"
-                            class="w-full h-full object-cover"
+                            class="w-full h-full object-cover lazy-video"
                             controls
-                            preload="metadata"
+                            preload="none"
                             data-video-id="{{ $task->id }}"
                             poster="{{ $thumbnailUrl }}"
+                            data-src="{{ $task->url }}"
                         >
-                            <source src="{{ $task->url }}" type="video/mp4">
-                            Your browser does not support the video tag.
-                        </video>
+                            </video>
                     @endif
 
-                    <!-- Video completion overlay -->
-                    <div id="completion-overlay-{{ $task->id }}" class="absolute inset-0 bg-green-900 bg-opacity-90 items-center justify-center hidden" style="display: none;">
+                    <div id="completion-overlay-{{ $task->id }}" class="absolute inset-0 bg-green-900 bg-opacity-90 flex items-center justify-center hidden">
                         <div class="text-center text-white">
                             <i class="fa-solid fa-check-circle text-6xl mb-4"></i>
                             <h3 class="text-2xl font-bold mb-2">Task Completed!</h3>
@@ -65,43 +94,51 @@
                 </div>
             @endif
 
-            <div class="p-6">
-                <h3 class="text-1xl text-white font-semibold mb-2">{{ $task->title }}</h3>
-                <p class="text-gray-200 text-xs mb-4">{{ Str::limit($task->description, 140) }}</p>
+            <div class="p-2">
+                <h3 class="text-sm text-white font-semibold mb-2">{{ Str::limit($task->title, 35) }}</h3>
+                <p class="text-gray-200 text-xs mb-4">{{ Str::limit($task->description, 120) }}</p>
                 <div class="flex items-center justify-between mb-4">
-                    <span class="text-2xl font-bold text-yellow-500">₦{{ number_format($task->reward_per_view, 2) }}</span>
-                    <span class="px-3 py-1 text-xs rounded-full {{ $isCompleted ? 'bg-green-700 text-green-100' : 'bg-red-700 text-red-100' }}">
-                        {{ $isCompleted ? 'Completed' : 'Available' }}
-                    </span>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-2xl font-bold text-yellow-500">₦{{ number_format($task->reward_per_view, 2) }}</span>
+                    </div>
+                    <div class="flex flex-col items-end gap-1 text-right">
+                         <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-eye text-sm text-white/50"></i>
+                            <span class="text-sm text-white/70">{{ $task->watches_count ?? $task->watches()->count() }} views</span>
+                        </div>
+                        <span class="px-3 py-1 text-xs rounded-full font-semibold {{ $isCompleted ? 'bg-green-700 text-green-100' : 'bg-blue-700 text-blue-100' }}">
+                            {{ $isCompleted ? 'Completed' : 'Available' }}
+                        </span>
+                    </div>
                 </div>
+
                 @if($isCompleted)
-                    <button class="w-full bg-green-700 cursor-not-allowed text-white py-2 px-4 rounded-lg transition-colors" disabled>
-                        <i class="fa-solid fa-check mr-2"></i>Completed
-                </button>
+                    <button class="w-full bg-green-700 text-white py-3 rounded-lg font-semibold transition-colors cursor-not-allowed opacity-70" disabled>
+                        <i class="fa-solid fa-check mr-2"></i> Completed
+                    </button>
                 @else
-                    <a href="{{ route('user.tasks.details', $task) }}" class="w-full bg-blue-700 hover:bg-blue-600 text-white py-2 px-4 rounded-lg transition-colors inline-block text-center">
-                        <i class="fa-solid fa-play mr-2"></i>View Task
+                    <a href="{{ route('user.tasks.details', $task) }}" class="w-full bg-blue-700 hover:bg-blue-600 text-white py-3 rounded-lg font-semibold transition-colors inline-block text-center">
+                        <i class="fa-solid fa-play mr-2"></i> View Task
                     </a>
                 @endif
             </div>
         </div>
         @empty
-        <div class="col-span-full text-center py-12">
-            <i class="fa-solid fa-list-check text-6xl text-gray-600 mb-4"></i>
-            <h3 class="text-xl font-semibold text-gray-400 mb-2">No Tasks Available</h3>
-            <p class="text-gray-500">Check back later for new earning opportunities!</p>
+        <div class="col-span-full text-center py-20 bg-blue-900 rounded-2xl shadow-xl">
+            <i class="fa-solid fa-list-check text-6xl text-blue-700 mb-4"></i>
+            <h3 class="text-2xl font-semibold text-white mb-2">No Tasks Available</h3>
+            <p class="text-white/60">Check back later for new earning opportunities!</p>
         </div>
         @endforelse
     </section>
 
     @if(method_exists($tasks, 'hasPages') && $tasks->hasPages())
-    <div class="mt-6">
+    <div class="mt-8">
         {{ $tasks->links() }}
     </div>
     @endif
 </main>
 
-<!-- YouTube Player API -->
 <script src="https://www.youtube.com/iframe_api"></script>
 
 <script>
@@ -110,57 +147,8 @@ let currentVideoId = null;
 let isTaskInProgress = false;
 let youtubePlayers = {};
 
-// YouTube API ready callback
-function onYouTubeIframeAPIReady() {
-    // Initialize YouTube players for all YouTube videos
-    const youtubeContainers = document.querySelectorAll('[id^="youtube-player-"]');
-    youtubeContainers.forEach(container => {
-        const videoId = container.id.replace('youtube-player-', '');
-        const youtubeId = container.dataset.youtubeId;
-
-        if (youtubeId) {
-            youtubePlayers[videoId] = new YT.Player(container.id, {
-                height: '100%',
-                width: '100%',
-                videoId: youtubeId,
-                playerVars: {
-                    'playsinline': 1,
-                    'controls': 1,
-                    'rel': 0,
-                    'modestbranding': 1
-                },
-                events: {
-                    'onReady': function(event) {
-                        // Hide loading indicator
-                        const loading = document.getElementById(`youtube-loading-${videoId}`);
-                        if (loading) {
-                            loading.style.display = 'none';
-                        }
-                    },
-                    'onStateChange': function(event) {
-                        if (event.data === YT.PlayerState.ENDED && currentVideoId === parseInt(videoId)) {
-                            completeVideo(videoId);
-                        }
-                    },
-                    'onError': function(event) {
-                        console.error('YouTube player error:', event.data);
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Video Error',
-                            text: 'Error loading YouTube video. Please try again.',
-                            toast: true,
-                            position: 'top-end',
-                            showConfirmButton: false,
-                            timer: 5000,
-                            timerProgressBar: true
-                        });
-                        resetTaskState(videoId);
-                    }
-                }
-            });
-        }
-    });
-}
+// YouTube API ready callback (deferred init handled by IntersectionObserver)
+function onYouTubeIframeAPIReady() {}
 
 // Function to start a task
 function startTask(videoId) {
@@ -337,6 +325,60 @@ function completeVideo(videoId) {
 
 // Initialize video event listeners on page load
 document.addEventListener('DOMContentLoaded', function() {
+    // Lazy load videos and YouTube iframes
+    const io = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            const el = entry.target;
+            const taskId = el.dataset.videoId || el.dataset.taskId;
+            const overlay = document.querySelector(`[data-lazy-overlay="${taskId}"]`);
+
+            // HTML5 video
+            if (el.classList.contains('lazy-video')) {
+                const src = el.getAttribute('data-src');
+                if (src && !el.querySelector('source')) {
+                    const source = document.createElement('source');
+                    source.src = src;
+                    source.type = 'video/mp4';
+                    el.appendChild(source);
+                    el.load();
+                }
+                if (overlay) overlay.style.display = 'none';
+                io.unobserve(el);
+            }
+
+            // YouTube container
+            if (el.classList.contains('lazy-youtube')) {
+                const youtubeId = el.dataset.youtubeId;
+                const containerId = el.id;
+                const videoId = el.dataset.taskId;
+                if (youtubeId && typeof YT !== 'undefined' && YT.Player) {
+                    youtubePlayers[videoId] = new YT.Player(containerId, {
+                        height: '100%',
+                        width: '100%',
+                        videoId: youtubeId,
+                        playerVars: { playsinline: 1, controls: 1, rel: 0, modestbranding: 1 },
+                        events: {
+                            onReady: function() { if (overlay) overlay.style.display = 'none'; },
+                            onStateChange: function(event) {
+                                if (event.data === YT.PlayerState.ENDED && currentVideoId === parseInt(videoId)) {
+                                    completeVideo(videoId);
+                                }
+                            },
+                            onError: function() {
+                                Swal.fire({ icon:'error', title:'Video Error', text:'Error loading YouTube video. Please try again.', toast:true, position:'top-end', showConfirmButton:false, timer:5000, timerProgressBar:true });
+                                resetTaskState(videoId);
+                            }
+                        }
+                    });
+                    io.unobserve(el);
+                }
+            }
+        });
+    }, { rootMargin: '200px 0px', threshold: 0.1 });
+
+    document.querySelectorAll('.lazy-video, .lazy-youtube').forEach(el => io.observe(el));
+
     // Add event listeners to all HTML5 video elements
     const videos = document.querySelectorAll('video[data-video-id]');
     videos.forEach(video => {

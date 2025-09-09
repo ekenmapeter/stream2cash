@@ -446,6 +446,69 @@ class AdminController extends Controller
     }
 
     /**
+     * Return details for a specific watch (JSON)
+     */
+    public function watchDetails(\Illuminate\Http\Request $request, \App\Models\UserVideoWatch $watch)
+    {
+        $watch->load(['user', 'video']);
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $watch->id,
+                'user' => [
+                    'id' => $watch->user->id,
+                    'name' => $watch->user->name,
+                    'email' => $watch->user->email,
+                ],
+                'video' => [
+                    'id' => $watch->video->id,
+                    'title' => $watch->video->title,
+                ],
+                'watch_duration' => $watch->watch_duration,
+                'video_duration' => $watch->video_duration,
+                'watch_percentage' => $watch->watch_percentage,
+                'seek_count' => $watch->seek_count,
+                'pause_count' => $watch->pause_count,
+                'heartbeat_count' => $watch->heartbeat_count,
+                'tab_visible' => (bool) $watch->tab_visible,
+                'is_valid' => (bool) $watch->is_valid,
+                'reward_earned' => $watch->reward_earned,
+                'watched_at' => optional($watch->watched_at)->toDateTimeString(),
+                'validation_notes' => $watch->validation_notes,
+                'watch_events' => $watch->watch_events,
+            ]
+        ]);
+    }
+
+    /**
+     * Credit reward for a specific watch; creates Earning if missing
+     */
+    public function creditWatch(\Illuminate\Http\Request $request, \App\Models\UserVideoWatch $watch)
+    {
+        if (!$watch->is_valid) {
+            return response()->json(['success' => false, 'message' => 'Watch is invalid and cannot be credited.'], 422);
+        }
+
+        $existing = Earning::where('user_id', $watch->user_id)
+            ->where('video_id', $watch->video_id)
+            ->first();
+
+        if ($existing) {
+            return response()->json(['success' => true, 'message' => 'Already credited.']);
+        }
+
+        $amount = optional($watch->video)->reward_per_view ?? 0;
+        $earning = Earning::create([
+            'user_id' => $watch->user_id,
+            'video_id' => $watch->video_id,
+            'amount' => $amount,
+            'type' => 'video_completion',
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Reward credited successfully.', 'earning_id' => $earning->id]);
+    }
+
+    /**
      * Update task
      */
     public function updateTask(Request $request, Video $task)

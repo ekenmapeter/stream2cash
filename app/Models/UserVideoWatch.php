@@ -49,7 +49,7 @@ class UserVideoWatch extends Model
     public function earning()
     {
         return $this->hasOne(Earning::class, 'video_id', 'video_id')
-                    ->where('user_id', $this->user_id);
+            ->whereColumn('earnings.user_id', 'user_video_watches.user_id');
     }
 }
 
