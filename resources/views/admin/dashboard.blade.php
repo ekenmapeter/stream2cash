@@ -70,7 +70,7 @@
           <i class="fa-solid fa-chart-line text-2xl"></i>
         </a>
 
-        <a href="{{ route('admin.settings') }}" class="bg-gray-700 hover:bg-gray-600 text-white p-6 rounded-xl flex items-center justify-between transition-colors">
+        <a href="{{ route('admin.settings.index') }}" class="bg-gray-700 hover:bg-gray-600 text-white p-6 rounded-xl flex items-center justify-between transition-colors">
           <div>
             <div class="font-semibold text-lg">Settings</div>
             <div class="text-sm text-gray-200">Configure platform settings</div>

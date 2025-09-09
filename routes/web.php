@@ -22,9 +22,15 @@ Route::middleware(['auth', 'verified', 'role:user', 'check.status', 'track.ip'])
     Route::get('/dashboard', [UserController::class, 'dashboard'])->name('dashboard');
     Route::get('/wallet', [UserController::class, 'wallet'])->name('wallet');
     Route::get('/tasks', [UserController::class, 'tasks'])->name('tasks');
+    Route::get('/tasks/{task}', [UserController::class, 'taskDetails'])->name('tasks.details');
+    Route::get('/tasks/{task}/watch', [UserController::class, 'watchTask'])->name('tasks.watch');
     Route::get('/profile', [UserController::class, 'profile'])->name('profile');
     Route::get('/withdrawal', [UserController::class, 'withdrawal'])->name('withdrawal');
 });
+
+// Video completion API routes
+Route::post('/api/video-complete', [UserController::class, 'completeVideo'])->middleware(['auth', 'verified', 'role:user', 'check.status']);
+Route::post('/api/video-heartbeat', [UserController::class, 'videoHeartbeat'])->middleware(['auth', 'verified', 'role:user', 'check.status']);
 
 // Admin Dashboard Routes - requires admin role
 Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -58,6 +64,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('/tasks/create', [AdminController::class, 'createTask'])->name('tasks.create');
     Route::post('/tasks', [AdminController::class, 'storeTask'])->name('tasks.store');
     Route::get('/tasks/{task}', [AdminController::class, 'showTask'])->name('tasks.show');
+    Route::get('/tasks/{task}/watchers', [AdminController::class, 'taskWatchers'])->name('tasks.watchers');
     Route::patch('/tasks/{task}', [AdminController::class, 'updateTask'])->name('tasks.update');
     Route::delete('/tasks/{task}', [AdminController::class, 'deleteTask'])->name('tasks.delete');
     Route::patch('/tasks/{task}/toggle-status', [AdminController::class, 'toggleTaskStatus'])->name('tasks.toggle-status');
@@ -74,13 +81,18 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('/analytics/earnings', [AdminController::class, 'earningAnalytics'])->name('analytics.earnings');
     Route::get('/analytics/withdrawals', [AdminController::class, 'withdrawalAnalytics'])->name('analytics.withdrawals');
 
-    // Settings Routes
-    Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
-    Route::patch('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');
+    // Settings Routes - moved to separate group below
 
     // Reports Routes
     Route::get('/reports', [AdminController::class, 'reports'])->name('reports');
     Route::get('/reports/export', [AdminController::class, 'exportReport'])->name('reports.export');
+
+    // Suspension Management Routes
+    Route::get('/suspensions', [AdminController::class, 'suspensions'])->name('suspensions');
+    Route::get('/suspensions/{suspension}', [AdminController::class, 'showSuspension'])->name('suspensions.show');
+    Route::patch('/suspensions/{suspension}/approve', [AdminController::class, 'approveSuspension'])->name('suspensions.approve');
+    Route::patch('/suspensions/{suspension}/reject', [AdminController::class, 'rejectSuspension'])->name('suspensions.reject');
+    Route::patch('/suspensions/{suspension}/credit-wallet', [AdminController::class, 'creditWallet'])->name('suspensions.credit-wallet');
 });
 
 // Redirect old dashboard route to appropriate dashboard based on role
@@ -109,4 +121,14 @@ require __DIR__.'/auth.php';
 Route::middleware(['guest'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/login', [AuthenticatedSessionController::class, 'createAdmin'])->name('login');
     Route::post('/login', [AuthenticatedSessionController::class, 'storeAdmin'])->name('login.store');
+});
+
+// Admin settings routes
+Route::middleware(['auth', 'verified', 'role:admin', 'check.status'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/settings', [App\Http\Controllers\Admin\SettingsController::class, 'index'])->name('settings.index');
+    Route::post('/settings', [App\Http\Controllers\Admin\SettingsController::class, 'update'])->name('settings.update');
+    Route::post('/settings/reset', [App\Http\Controllers\Admin\SettingsController::class, 'reset'])->name('settings.reset');
+    Route::get('/settings/group/{group}', [App\Http\Controllers\Admin\SettingsController::class, 'getByGroup'])->name('settings.group');
+    Route::post('/settings/single', [App\Http\Controllers\Admin\SettingsController::class, 'updateSingle'])->name('settings.single');
+    Route::patch('/settings/autopilot', [App\Http\Controllers\Admin\AdminController::class, 'toggleAutopilot'])->name('settings.autopilot');
 });

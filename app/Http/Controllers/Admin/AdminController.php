@@ -7,13 +7,17 @@ use App\Models\User;
 use App\Models\Video;
 use App\Models\Withdrawal;
 use App\Models\Earning;
+use App\Models\UserVideoWatch;
 use App\Models\UserIpRecord;
+use App\Models\SuspensionOrchestration;
+use App\Services\SuspensionService;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 
 class AdminController extends Controller
 {
@@ -377,13 +381,68 @@ class AdminController extends Controller
     {
         $task->load('watches.user');
 
+        // Get actual earnings from the earnings table for this task
+        $total_earnings = Earning::where('video_id', $task->id)->sum('amount');
+
         $task_stats = [
             'total_watches' => $task->watches->count(),
             'unique_users' => $task->watches->pluck('user_id')->unique()->count(),
-            'total_rewards' => $task->watches->sum('reward_amount'),
+            'total_rewards' => $total_earnings,
         ];
 
         return view('admin.tasks.show', compact('task', 'task_stats'));
+    }
+
+    /**
+     * Show users who watched a specific task
+     */
+    public function taskWatchers(Request $request, Video $task)
+    {
+        $query = UserVideoWatch::with(['user', 'earning'])
+            ->where('video_id', $task->id);
+
+        // Search functionality
+        if ($request->has('search') && $request->search) {
+            $query->whereHas('user', function($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%')
+                  ->orWhere('email', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        // Filter by validation status
+        if ($request->has('is_valid') && $request->is_valid !== '') {
+            $query->where('is_valid', $request->is_valid);
+        }
+
+        // Filter by watch percentage range
+        if ($request->has('min_percentage') && $request->min_percentage) {
+            $query->where('watch_percentage', '>=', $request->min_percentage);
+        }
+        if ($request->has('max_percentage') && $request->max_percentage) {
+            $query->where('watch_percentage', '<=', $request->max_percentage);
+        }
+
+        // Sort options
+        $sortBy = $request->get('sort_by', 'watched_at');
+        $sortOrder = $request->get('sort_order', 'desc');
+
+        $allowedSorts = ['watched_at', 'watch_percentage', 'reward_earned', 'watch_duration'];
+        if (in_array($sortBy, $allowedSorts)) {
+            $query->orderBy($sortBy, $sortOrder);
+        }
+
+        $watchers = $query->paginate(15)->withQueryString();
+
+        // Get task statistics for the header
+        $task_stats = [
+            'total_watches' => UserVideoWatch::where('video_id', $task->id)->count(),
+            'valid_watches' => UserVideoWatch::where('video_id', $task->id)->where('is_valid', true)->count(),
+            'invalid_watches' => UserVideoWatch::where('video_id', $task->id)->where('is_valid', false)->count(),
+            'total_rewards' => Earning::where('video_id', $task->id)->sum('amount'),
+            'avg_watch_percentage' => UserVideoWatch::where('video_id', $task->id)->avg('watch_percentage'),
+        ];
+
+        return view('admin.tasks.watchers', compact('task', 'watchers', 'task_stats'));
     }
 
     /**
@@ -637,5 +696,120 @@ class AdminController extends Controller
         // This would typically generate and download a file
 
         return redirect()->back()->with('success', 'Report exported successfully.');
+    }
+
+    /**
+     * Show suspensions management page
+     */
+    public function suspensions(Request $request)
+    {
+        $query = SuspensionOrchestration::with(['user', 'video', 'resolvedBy']);
+
+        // Filter by status
+        if ($request->has('status') && $request->status) {
+            $query->where('status', $request->status);
+        }
+
+        // Filter by type
+        if ($request->has('type') && $request->type) {
+            $query->where('suspension_type', $request->type);
+        }
+
+        // Search by user name or email
+        if ($request->has('search') && $request->search) {
+            $query->whereHas('user', function($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%')
+                  ->orWhere('email', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        $suspensions = $query->orderBy('created_at', 'desc')->paginate(15);
+
+        // Get suspension statistics
+        $suspensionService = new SuspensionService();
+        $stats = $suspensionService->getSuspensionStats();
+
+        return view('admin.suspensions.index', compact('suspensions', 'stats'));
+    }
+
+    /**
+     * Show specific suspension details
+     */
+    public function showSuspension(SuspensionOrchestration $suspension)
+    {
+        $suspension->load(['user', 'video', 'resolvedBy']);
+        return view('admin.suspensions.show', compact('suspension'));
+    }
+
+    /**
+     * Approve suspension and credit wallet
+     */
+    public function approveSuspension(Request $request, SuspensionOrchestration $suspension)
+    {
+        $request->validate([
+            'admin_notes' => 'nullable|string|max:1000'
+        ]);
+
+        $suspensionService = new SuspensionService();
+        $suspensionService->creditUserWallet($suspension);
+
+        $suspension->approve(Auth::id(), $request->admin_notes);
+
+        return redirect()->route('admin.suspensions')
+            ->with('success', 'Suspension approved and wallet credited successfully.');
+    }
+
+    /**
+     * Reject suspension
+     */
+    public function rejectSuspension(Request $request, SuspensionOrchestration $suspension)
+    {
+        $request->validate([
+            'admin_notes' => 'required|string|max:1000'
+        ]);
+
+        $suspensionService = new SuspensionService();
+        $suspensionService->rejectSuspension($suspension, Auth::id(), $request->admin_notes);
+
+        return redirect()->route('admin.suspensions')
+            ->with('success', 'Suspension rejected successfully.');
+    }
+
+    /**
+     * Credit wallet for approved suspension
+     */
+    public function creditWallet(SuspensionOrchestration $suspension)
+    {
+        if ($suspension->wallet_credited) {
+            return redirect()->back()->with('error', 'Wallet has already been credited for this suspension.');
+        }
+
+        $suspensionService = new SuspensionService();
+        $suspensionService->creditUserWallet($suspension);
+
+        return redirect()->back()->with('success', 'Wallet credited successfully.');
+    }
+
+    /**
+     * Toggle autopilot mode
+     */
+    public function toggleAutopilot(Request $request)
+    {
+        $request->validate([
+            'enabled' => 'required|boolean'
+        ]);
+
+        // Update config or database setting
+        // For now, we'll use a simple approach
+        $enabled = $request->enabled;
+
+        // You can store this in a settings table or config file
+        // For demonstration, we'll use a simple approach
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Autopilot mode ' . ($enabled ? 'enabled' : 'disabled'),
+            'enabled' => $enabled
+        ]);
     }
 }

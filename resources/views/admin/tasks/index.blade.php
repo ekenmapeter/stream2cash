@@ -48,6 +48,7 @@
             <tr>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Task</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reward per View</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Views</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -58,12 +59,17 @@
               <tr class="hover:bg-gray-50">
                 <td class="px-6 py-4">
                   <div>
-                    <div class="text-sm font-medium text-gray-900">{{ $task->title }}</div>
-                    <div class="text-sm text-gray-500">{{ Str::limit($task->description, 50) }}</div>
+                    <div class="text-sm font-medium text-gray-900">{{Str::limit($task->title, 35) }}</div>
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  ₪{{ number_format($task->reward_per_view, 2) }}
+                    ₦{{ number_format($task->reward_per_view, 2) }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <div class="flex items-center">
+                    <i class="fa-solid fa-eye mr-1 text-gray-400"></i>
+                    {{ $task->watches()->count() }}
+                  </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span class="px-2 py-1 text-xs font-semibold rounded-full {{ $task->status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
@@ -75,13 +81,16 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div class="flex space-x-2">
-                    <a href="{{ route('admin.tasks.show', $task) }}" class="text-blue-600 hover:text-blue-900">
+                    <a href="{{ route('admin.tasks.show', $task) }}" class="text-blue-600 hover:text-blue-900" title="View Task">
                       <i class="fa-solid fa-eye"></i>
+                    </a>
+                    <a href="{{ route('admin.tasks.watchers', $task) }}" class="text-green-600 hover:text-green-900" title="View Watchers">
+                      <i class="fa-solid fa-users"></i>
                     </a>
                     <form method="POST" action="{{ route('admin.tasks.toggle-status', $task) }}" class="inline">
                       @csrf
                       @method('PATCH')
-                      <button type="submit" class="text-yellow-600 hover:text-yellow-900">
+                      <button type="submit" class="text-yellow-600 hover:text-yellow-900" title="Toggle Status">
                         <i class="fa-solid fa-toggle-{{ $task->status === 'active' ? 'on' : 'off' }}"></i>
                       </button>
                     </form>
@@ -89,7 +98,7 @@
                           onsubmit="return confirm('Are you sure you want to delete this task?')">
                       @csrf
                       @method('DELETE')
-                      <button type="submit" class="text-red-600 hover:text-red-900">
+                      <button type="submit" class="text-red-600 hover:text-red-900" title="Delete Task">
                         <i class="fa-solid fa-trash"></i>
                       </button>
                     </form>
@@ -98,7 +107,7 @@
               </tr>
             @empty
               <tr>
-                <td colspan="5" class="px-6 py-4 text-center text-gray-500">No tasks found</td>
+                <td colspan="6" class="px-6 py-4 text-center text-gray-500">No tasks found</td>
               </tr>
             @endforelse
           </tbody>

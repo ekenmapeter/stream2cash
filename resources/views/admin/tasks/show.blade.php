@@ -35,7 +35,7 @@
             </div>
             <div class="flex justify-between">
               <span class="text-gray-600">Reward per View:</span>
-              <span class="font-medium text-green-600">₪{{ number_format($task->reward_per_view, 2) }}</span>
+              <span class="font-medium text-green-600">₦{{ number_format($task->reward_per_view, 2) }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-gray-600">Created:</span>
@@ -49,15 +49,30 @@
           <div class="space-y-3">
             <div class="flex justify-between">
               <span class="text-gray-600">Total Views:</span>
-              <span class="font-medium">{{ $task_stats['total_watches'] }}</span>
+              <span class="font-medium flex items-center">
+                <i class="fa-solid fa-eye mr-1 text-gray-400"></i>
+                {{ $task_stats['total_watches'] }}
+              </span>
             </div>
             <div class="flex justify-between">
               <span class="text-gray-600">Unique Users:</span>
-              <span class="font-medium">{{ $task_stats['unique_users'] }}</span>
+              <span class="font-medium flex items-center">
+                <i class="fa-solid fa-users mr-1 text-gray-400"></i>
+                {{ $task_stats['unique_users'] }}
+              </span>
             </div>
             <div class="flex justify-between">
               <span class="text-gray-600">Total Rewards Paid:</span>
-              <span class="font-medium">₪{{ number_format($task_stats['total_rewards'], 2) }}</span>
+              <span class="font-medium text-green-600 flex items-center">
+                <i class="fa-solid fa-money-bill-wave mr-1"></i>
+                ₦{{ number_format($task_stats['total_rewards'], 2) }}
+              </span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Average per View:</span>
+              <span class="font-medium text-blue-600">
+                ₦{{ $task_stats['total_watches'] > 0 ? number_format($task_stats['total_rewards'] / $task_stats['total_watches'], 2) : '0.00' }}
+              </span>
             </div>
           </div>
         </div>
@@ -78,7 +93,11 @@
       </div>
 
       <!-- Actions -->
-      <div class="flex gap-4">
+      <div class="flex gap-4 flex-wrap">
+        <a href="{{ route('admin.tasks.watchers', $task) }}" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors">
+          <i class="fa-solid fa-users mr-2"></i>View Watchers
+        </a>
+
         <form method="POST" action="{{ route('admin.tasks.toggle-status', $task) }}">
           @csrf
           @method('PATCH')

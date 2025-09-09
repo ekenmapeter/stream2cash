@@ -28,7 +28,7 @@
       <i class="fa-solid fa-file-export mr-3"></i>
       <span>Reports</span>
     </a>
-    <a href="{{ route('admin.settings') }}" class="flex items-center px-3 py-2 rounded hover:bg-gray-100 {{ request()->routeIs('admin.settings') ? 'bg-gray-100 font-semibold' : '' }}">
+    <a href="{{ route('admin.settings.index') }}" class="flex items-center px-3 py-2 rounded hover:bg-gray-100 {{ request()->routeIs('admin.settings*') ? 'bg-gray-100 font-semibold' : '' }}">
       <i class="fa-solid fa-cog mr-3"></i>
       <span>Settings</span>
     </a>

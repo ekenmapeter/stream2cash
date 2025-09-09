@@ -65,6 +65,16 @@ class User extends Authenticatable
         return $this->hasMany(UserIpRecord::class);
     }
 
+    public function suspensionOrchestrations()
+    {
+        return $this->hasMany(SuspensionOrchestration::class);
+    }
+
+    public function pendingSuspensions()
+    {
+        return $this->suspensionOrchestrations()->pending();
+    }
+
     // Status helper methods
     public function isActive()
     {

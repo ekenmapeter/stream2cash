@@ -25,5 +25,11 @@ class Earning extends Model
     {
         return $this->belongsTo(Video::class);
     }
+
+    public function userVideoWatch()
+    {
+        return $this->hasOne(UserVideoWatch::class, 'video_id', 'video_id')
+                    ->where('user_id', $this->user_id);
+    }
 }
 
