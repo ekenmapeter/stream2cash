@@ -64,17 +64,20 @@
         </nav>
 
         <!-- User and Logout -->
-        <div class="p-4 border-t border-b border-blue-700">
+        <div class="p-4 border-t border-gray-300">
             <div class="mb-4">
-                <div class="text-sm text-black">{{ Auth::user()->name ?? 'username' }}</div>
-                <div class="text-xs text-black">Last Login: {{ Auth::user()->last_login_at ? Auth::user()->last_login_at->diffForHumans() : '45 minutes ago' }}</div>
+                <div class="flex items-center space-x-2 text-black font-semibold">
+                    <i class="fa-solid fa-user text-sm"></i>
+                    <span>{{ Auth::user()->name ?? 'username' }}</span>
+                </div>
+                <div class="flex items-center space-x-2 text-xs text-gray-500 mt-1">
+                    <i class="fa-solid fa-clock text-xs"></i>
+                    <span>Last Login: {{ Auth::user()->last_login_at ? Auth::user()->last_login_at->diffForHumans() : 'N/A' }}</span>
+                </div>
             </div>
-        </div>
-        <div class="p-4">
-
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" class="flex items-center space-x-3 p-3 rounded-lg text-red-600 hover:bg-gray-700 transition-colors duration-200 w-full">
+                <button type="submit" class="flex items-center space-x-3 p-3 rounded-lg text-red-600 hover:bg-red-100 transition-colors duration-200 w-full font-semibold">
                     <i class="fa-solid fa-right-from-bracket w-5"></i>
                     <span>Logout</span>
                 </button>

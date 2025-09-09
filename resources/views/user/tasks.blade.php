@@ -66,7 +66,7 @@
             @endif
 
             <div class="p-6">
-                <h3 class="text-xl text-white font-semibold mb-2">{{ $task->title }}</h3>
+                <h3 class="text-1xl text-white font-semibold mb-2">{{ $task->title }}</h3>
                 <p class="text-gray-200 text-xs mb-4">{{ Str::limit($task->description, 140) }}</p>
                 <div class="flex items-center justify-between mb-4">
                     <span class="text-2xl font-bold text-yellow-500">₦{{ number_format($task->reward_per_view, 2) }}</span>
