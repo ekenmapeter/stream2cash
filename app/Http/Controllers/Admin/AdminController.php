@@ -399,13 +399,7 @@ class AdminController extends Controller
     public function taskWatchers(Request $request, Video $task)
     {
         $query = UserVideoWatch::with(['user'])
-            ->where('video_id', $task->id)
-            ->addSelect([
-                'has_earning' => Earning::selectRaw('1')
-                    ->whereColumn('earnings.user_id', 'user_video_watches.user_id')
-                    ->whereColumn('earnings.video_id', 'user_video_watches.video_id')
-                    ->limit(1),
-            ]);
+            ->where('video_id', $task->id);
 
         // Search functionality
         if ($request->has('search') && $request->search) {
@@ -438,6 +432,17 @@ class AdminController extends Controller
         }
 
         $watchers = $query->paginate(15)->withQueryString();
+
+        // Attach has_earning in PHP to avoid correlated subquery issues
+        $userIds = $watchers->pluck('user_id')->all();
+        $paidUserIds = Earning::where('video_id', $task->id)
+            ->whereIn('user_id', $userIds)
+            ->pluck('user_id')
+            ->all();
+        $paidSet = array_flip($paidUserIds);
+        foreach ($watchers as $w) {
+            $w->has_earning = isset($paidSet[$w->user_id]);
+        }
 
         // Get task statistics for the header
         $task_stats = [
