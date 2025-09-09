@@ -398,8 +398,14 @@ class AdminController extends Controller
      */
     public function taskWatchers(Request $request, Video $task)
     {
-        $query = UserVideoWatch::with(['user', 'earning'])
-            ->where('video_id', $task->id);
+        $query = UserVideoWatch::with(['user'])
+            ->where('video_id', $task->id)
+            ->addSelect([
+                'has_earning' => Earning::selectRaw('1')
+                    ->whereColumn('earnings.user_id', 'user_video_watches.user_id')
+                    ->whereColumn('earnings.video_id', 'user_video_watches.video_id')
+                    ->limit(1),
+            ]);
 
         // Search functionality
         if ($request->has('search') && $request->search) {

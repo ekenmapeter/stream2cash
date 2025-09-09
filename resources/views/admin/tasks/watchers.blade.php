@@ -170,7 +170,7 @@
                 <td class="px-6 py-4">
                   <div class="text-sm">
                     <div class="font-medium text-green-600">₦{{ number_format($watch->reward_earned, 2) }}</div>
-                    @if($watch->earning)
+                    @if($watch->has_earning)
                       <div class="text-xs text-gray-500">Paid</div>
                     @else
                       <div class="text-xs text-red-500">Not Paid</div>
