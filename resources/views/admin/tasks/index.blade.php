@@ -3,8 +3,8 @@
 
 @section('content')
 
-<div class="pt-20">
-  <section class="flex justify-center items-center py-16 px-4">
+<div class="pt-0">
+  <section class="flex justify-center items-center py-8 px-4">
     <div class="bg-white text-black rounded-2xl shadow-lg w-full max-w-6xl p-8">
 
       <!-- Header -->

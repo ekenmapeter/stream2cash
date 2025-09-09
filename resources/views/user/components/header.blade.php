@@ -99,3 +99,13 @@
 </head>
 <body class=" bg-[#F4F4F4] text-black flex flex-col lg:flex-row min-h-screen">
     @include('sweetalert::alert')
+
+    <!-- Brand bar -->
+    <div class="fixed top-0 left-0 right-0 z-40 bg-white shadow">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+            <a href="{{ route('user.dashboard') }}" class="flex items-center gap-2">
+                <img src="{{ asset('images/logo.png') }}" alt="{{ config('app.name', 'Stream2Cash') }}" class="h-8 w-8 rounded">
+                <span class="font-semibold text-lg text-gray-800">{{ config('app.name', 'Stream2Cash') }}</span>
+            </a>
+        </div>
+    </div>

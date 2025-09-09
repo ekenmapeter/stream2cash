@@ -59,7 +59,7 @@
                 </div>
             @endif
 
-                    <form id="settingsForm" method="POST" action="{{ route('admin.settings.update') }}">
+                    <form id="settingsForm" method="POST" action="{{ route('admin.settings.update') }}" enctype="multipart/form-data">
                         @csrf
 
                         <!-- Settings Tabs -->
@@ -92,6 +92,15 @@
                             <!-- General Settings -->
                             <div class="tab-content active" id="general">
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="space-y-2">
+                                        <label for="site_logo" class="block text-sm font-medium text-gray-700">Site Logo</label>
+                                        <input type="file" id="site_logo" name="site_logo" accept="image/png,image/jpeg,image/svg+xml"
+                                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                        <div class="flex items-center gap-3 mt-2">
+                                            <img src="{{ asset('images/logo.png') }}" alt="Current Logo" class="h-10 w-10 rounded border">
+                                            <span class="text-xs text-gray-500">/public/images/logo.png</span>
+                                        </div>
+                                    </div>
                                     @if(isset($settings['general']))
                                         @foreach($settings['general']['settings'] as $setting)
                                             <div class="space-y-2">

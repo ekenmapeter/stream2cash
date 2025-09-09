@@ -34,6 +34,8 @@ class SettingsController extends Controller
         $validator = Validator::make($request->all(), [
             'settings' => 'required|array',
             'settings.*' => 'nullable',
+            'site_name' => 'nullable|string|max:255',
+            'site_logo' => 'nullable|image|mimes:png,jpg,jpeg,svg|max:2048',
         ]);
 
         if ($validator->fails()) {
@@ -43,9 +45,18 @@ class SettingsController extends Controller
         }
 
         try {
-            $updated = $this->settingsService->updateSettings($request->input('settings', []));
+            // Handle logo upload
+            if ($request->hasFile('site_logo')) {
+                $file = $request->file('site_logo');
+                $file->move(public_path('images'), 'logo.png');
+            }
 
-            if (count($updated) > 0) {
+            // Handle site name and other settings
+            $settingsInput = $request->input('settings', []);
+
+            $updated = $this->settingsService->updateSettings($settingsInput);
+
+            if (count($updated) > 0 || $request->hasFile('site_logo')) {
                 return redirect()->back()
                     ->with('success', 'Settings updated successfully!');
             } else {
