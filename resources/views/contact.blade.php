@@ -9,10 +9,10 @@
     <div data-aos="fade-right">
       <h1 class="text-5xl lg:text-7xl font-bold mb-4">Contact Us</h1>
       <p class="text-lg leading-relaxed mb-6">
-        At Stream2Cash, we're revolutionizing how people earn money online by rewarding them
+        At StreamAdolla, we're revolutionizing how people earn money online by rewarding them
         for what they already love to do - watch videos.
       </p>
-      <p class="mb-2 text-1xl">info@stream2cash.com</p>
+      <p class="mb-2 text-1xl">info@StreamAdolla.com</p>
       <p class="text-1xl">+2349000000000</p>
     </div>
     <div class="flex justify-center" data-aos="fade-left">
@@ -25,14 +25,14 @@
     <div class="rounded-lg p-4 md:p-6" data-aos="fade-up">
       <h3 class="font-bold text-lg md:text-xl mb-3">Customer Support</h3>
       <p class="text-sm leading-relaxed">
-        At Stream2Cash, we're revolutionizing how people earn money online
+        At StreamAdolla, we're revolutionizing how people earn money online
         by rewarding them for what they already love to do - watch videos.
       </p>
     </div>
     <div class="rounded-lg p-4 md:p-6" data-aos="fade-up" data-aos-delay="200">
       <h3 class="font-bold text-lg md:text-xl mb-3">Feedback and Suggestions</h3>
       <p class="text-sm leading-relaxed">
-        At Stream2Cash, we're revolutionizing how people earn money online
+        At StreamAdolla, we're revolutionizing how people earn money online
         by rewarding them for what they already love to do - watch videos.
       </p>
     </div>

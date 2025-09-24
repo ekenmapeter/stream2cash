@@ -1,6 +1,6 @@
 @extends('user.layouts.app')
 
-@section('title', 'Tasks | Stream2Cash')
+@section('title', 'Tasks | StreamAdolla')
 
 @section('content')
 <main class="flex-grow p-6">
@@ -99,7 +99,7 @@
                 <p class="text-gray-200 text-xs mb-4">{{ Str::limit($task->description, 120) }}</p>
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex items-center space-x-2">
-                        <span class="text-2xl font-bold text-yellow-500">₦{{ number_format($task->reward_per_view, 2) }}</span>
+                    <span class="text-2xl font-bold text-yellow-500">₦{{ number_format($task->reward_per_view, 2) }}</span>
                     </div>
                     <div class="flex flex-col items-end gap-1 text-right">
                          <div class="flex items-center gap-2">
@@ -107,15 +107,15 @@
                             <span class="text-sm text-white/70">{{ $task->watches_count ?? $task->watches()->count() }} views</span>
                         </div>
                         <span class="px-3 py-1 text-xs rounded-full font-semibold {{ $isCompleted ? 'bg-green-700 text-green-100' : 'bg-blue-700 text-blue-100' }}">
-                            {{ $isCompleted ? 'Completed' : 'Available' }}
-                        </span>
+                        {{ $isCompleted ? 'Completed' : 'Available' }}
+                    </span>
                     </div>
                 </div>
 
                 @if($isCompleted)
                     <button class="w-full bg-green-700 text-white py-3 rounded-lg font-semibold transition-colors cursor-not-allowed opacity-70" disabled>
                         <i class="fa-solid fa-check mr-2"></i> Completed
-                    </button>
+                </button>
                 @else
                     <a href="{{ route('user.tasks.details', $task) }}" class="w-full bg-blue-700 hover:bg-blue-600 text-white py-3 rounded-lg font-semibold transition-colors inline-block text-center">
                         <i class="fa-solid fa-play mr-2"></i> View Task

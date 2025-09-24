@@ -10,7 +10,7 @@
       Into <span class="bg-yellow-400 text-black px-2 rounded-lg text-2xl md:text-4xl">Earn Time</span>
     </h1>
     <p class="mt-4 md:mt-6 text-base md:text-lg max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="200">
-      At Stream2Cash, we're revolutionizing how people earn money online by rewarding them
+      At StreamAdolla, we're revolutionizing how people earn money online by rewarding them
       for what they already love to do – watch videos.
     </p>
   </section>
@@ -27,7 +27,7 @@
         </div>
         <div>
           <p class="text-base md:text-lg leading-relaxed">
-            Welcome to Stream2Cash, the innovative platform that pays you for your viewing time.
+            Welcome to StreamAdolla, the innovative platform that pays you for your viewing time.
             Our mission is to create a fair and transparent ecosystem where users can monetize their
             screen time while advertisers reach engaged audiences.
           </p>
@@ -45,7 +45,7 @@
           <p class="text-base md:text-lg leading-relaxed">
             What began as a simple idea – "what if people could earn money just by watching videos?" –
             has grown into a thriving community of [X] thousand users worldwide. We noticed that traditional
-            advertising models benefited platforms but rarely the viewers. Stream2Cash changes that equation.
+            advertising models benefited platforms but rarely the viewers. StreamAdolla changes that equation.
           </p>
         </div>
       </div>
@@ -74,7 +74,7 @@
 
   <!-- Why Choose Section -->
   <section class="max-w-5xl mx-auto px-4 md:px-6 py-12 md:py-16 flex flex-col justify-center items-center">
-    <button class="bg-yellow-400 text-black px-4 md:px-6 py-2 rounded-md font-semibold mb-4 md:mb-6 text-sm md:text-base" data-aos="fade-up">Why Choose Stream2Cash</button>
+    <button class="bg-yellow-400 text-black px-4 md:px-6 py-2 rounded-md font-semibold mb-4 md:mb-6 text-sm md:text-base" data-aos="fade-up">Why Choose StreamAdolla</button>
 
     <div class="p-2 rounded-lg shadow-lg" data-aos="zoom-in">
       <ul class="list-disc list-inside space-y-2 text-base md:text-lg">

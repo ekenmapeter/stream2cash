@@ -5,9 +5,9 @@
 
   <!-- Hero Section -->
   <section class="text-center py-16 px-6 max-w-3xl mx-auto" data-aos="fade-up">
-    <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold mb-6">How Stream2Cash Works</h1>
+    <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold mb-6">How StreamAdolla Works</h1>
     <p class="text-lg text-gray-300">
-      Getting started with Stream2Cash is simple.
+      Getting started with StreamAdolla is simple.
       Follow these six steps to begin your earning journey.
     </p>
   </section>
@@ -22,7 +22,7 @@
         <h2 class="text-xl font-bold">Sign Up</h2>
       </div>
       <p class="text-gray-700">
-        Create your free Stream2Cash account in just a few clicks.
+        Create your free StreamAdolla account in just a few clicks.
       </p>
     </div>
 
@@ -87,7 +87,7 @@
   <section class="text-center py-16 px-6" data-aos="zoom-in">
     <h2 class="text-2xl md:text-3xl lg:text-4xl font-bold mb-6">Start Earning Today!</h2>
     <p class="text-lg text-gray-300 mb-8 max-w-2xl mx-auto">
-      Sign up now and complete your first task to begin your earning journey with Stream2Cash.
+      Sign up now and complete your first task to begin your earning journey with StreamAdolla.
     </p>
     <div class="flex flex-col sm:flex-row gap-4 justify-center">
       <a href="{{ route('register') }}" class="bg-yellow-400 text-black px-6 py-3 rounded-lg font-semibold hover:bg-yellow-500 transition-all duration-200 transform hover:scale-105 active:scale-95">

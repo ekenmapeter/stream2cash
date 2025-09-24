@@ -7,7 +7,7 @@
   <section class="text-center py-16 px-6 max-w-3xl mx-auto" data-aos="fade-up">
     <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold mb-6">What Our Users Say</h1>
     <p class="text-lg text-gray-300">
-      Stream2Cash has transformed the way people earn online.
+        StreamAdolla has transformed the way people earn online.
       Here's what some of our amazing users have to say.
     </p>
   </section>
@@ -28,7 +28,7 @@
         <span>★★★★★</span>
       </div>
       <p class="text-gray-700">
-        "I love Stream2Cash! The tasks are simple, and I got paid instantly after completing my first one."
+        "I love StreamAdolla! The tasks are simple, and I got paid instantly after completing my first one."
       </p>
     </div>
 
@@ -62,7 +62,7 @@
         <span>★★★★★</span>
       </div>
       <p class="text-gray-700">
-        "I didn't believe it at first, but after completing a few tasks, I started earning consistently. Great job Stream2Cash!"
+        "I didn't believe it at first, but after completing a few tasks, I started earning consistently. Great job StreamAdolla!"
       </p>
     </div>
 
@@ -96,7 +96,7 @@
         <span>★★★★★</span>
       </div>
       <p class="text-gray-700">
-        "I use Stream2Cash daily. It's reliable, fast, and truly rewarding. I encourage everyone to join."
+        "I use StreamAdolla daily. It's reliable, fast, and truly rewarding. I encourage everyone to join."
       </p>
     </div>
 
@@ -113,7 +113,7 @@
         <span>★★★★★</span>
       </div>
       <p class="text-gray-700">
-        "Stream2Cash has been a game-changer for me. I can earn money while doing simple tasks. Amazing platform!"
+        "StreamAdolla has been a game-changer for me. I can earn money while doing simple tasks. Amazing platform!"
       </p>
     </div>
 
@@ -123,7 +123,7 @@
   <section class="text-center py-16 px-6" data-aos="zoom-in">
     <h2 class="text-2xl md:text-3xl lg:text-4xl font-bold mb-6">Join Our Happy Community</h2>
     <p class="text-lg text-gray-300 mb-8 max-w-2xl mx-auto">
-      Thousands are already earning with Stream2Cash.
+      Thousands are already earning with StreamAdolla.
       Don't miss out on the opportunity to get rewarded for simple tasks.
     </p>
     <div class="flex flex-col sm:flex-row gap-4 justify-center">

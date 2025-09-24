@@ -370,7 +370,6 @@ class UserController extends Controller
     {
         // 1. Validate the incoming request
         $request->validate([
-            'user_id' => 'required|exists:users,id',
             'video_id' => 'required|exists:videos,id',
             'watch_duration' => 'required|integer|min:0',
             'video_duration' => 'required|integer|min:1',
@@ -384,14 +383,11 @@ class UserController extends Controller
             'validation_notes' => 'nullable|array'
         ]);
 
-        $userId = $request->input('user_id');
+        $userId = Auth::id();
         $videoId = $request->input('video_id');
         $user = User::find($userId);
 
-        // Security check: ensure the authenticated user is the one making the request
-        if (Auth::id() != $userId) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized action.'], 403);
-        }
+        // Security: user is taken from session; no posted user id is trusted
 
         // 2. Check if the user has already been rewarded for this video
         $hasCompleted = UserVideoWatch::where('user_id', $userId)

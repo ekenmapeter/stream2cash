@@ -9,7 +9,8 @@
     <!-- Sidebar -->
     <aside id="sidebar" class="fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out bg-[#F4F4F4] w-64 flex flex-col shadow-lg z-40">
         <div class="p-6 text-2xl font-bold text-black text-center">
-            Stream2Cash
+            <img src="{{ asset('images/logo.png') }}" alt="StreamAdolla" class="rounded-lg w-full">
+
         </div>
             <!-- Impersonation Banner -->
             @if(Auth::check() && Auth::user()->isImpersonated())

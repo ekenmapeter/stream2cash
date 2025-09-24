@@ -13,7 +13,7 @@
     <div class="w-full lg:max-w-7xl mx-auto py-12 grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 gap-4 lg:gap-12 text-sm" data-aos="fade-up">
  <!-- Logo + About -->
  <div class="hidden lg:block w-full lg:max-w-7xl mx-auto">
-    <h4 class="font-bold text-lg mb-3">Stream2Cash</h4>
+    <img src="{{ asset('images/logo.png') }}" alt="Stream2Cash" class="rounded-lg w-1/2">
     <p class="leading-relaxed max-w-md">
       Wonderful platform with easy-to-do tasks to make money — I got paid instantly.
     </p>

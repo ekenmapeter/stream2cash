@@ -1,6 +1,6 @@
 @extends('user.layouts.app')
 
-@section('title', $task->title . ' | Stream2Cash')
+@section('title', $task->title . ' | StreamAdolla')
 
 @section('content')
 <!-- Main Content Area -->

@@ -5,8 +5,7 @@
         <i class="fa-solid fa-bars text-lg"></i>
       </button>
       <a href="{{ route('admin.dashboard') }}" class="flex items-center space-x-2">
-        <img src="{{ asset('images/logo.png') }}" alt="{{ config('app.name', 'Stream2Cash') }}" class="h-8 w-8 rounded">
-        <span class="font-bold text-lg">{{ config('app.name', 'Stream2Cash') }}</span>
+        <img src="{{ asset('images/logo.png') }}" alt="{{ config('app.name', 'Stream2Cash') }}" class="w-full">
       </a>
     </div>
     <div class="flex items-center space-x-4">

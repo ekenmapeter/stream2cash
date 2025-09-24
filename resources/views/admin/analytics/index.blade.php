@@ -3,7 +3,7 @@
 
 @section('content')
 
-<div class="pt-20">
+<div class="pt-2">
   <section class="flex justify-center items-center py-16 px-4">
     <div class="bg-white text-black rounded-2xl shadow-lg w-full max-w-6xl p-8">
 
@@ -44,42 +44,42 @@
         <div class="bg-white border rounded-xl p-5 flex items-center justify-between">
           <div>
             <div class="text-sm text-gray-500">Total Earnings</div>
-            <div class="text-2xl font-bold text-gray-800">₪{{ number_format($earning_stats['total_earnings']) }}</div>
+            <div class="text-2xl font-bold text-gray-800">${{ number_format($earning_stats['total_earnings']) }}</div>
           </div>
           <i class="fa-solid fa-dollar-sign text-amber-600 text-2xl"></i>
         </div>
         <div class="bg-white border rounded-xl p-5 flex items-center justify-between">
           <div>
             <div class="text-sm text-gray-500">Earnings This Month</div>
-            <div class="text-2xl font-bold text-gray-800">₪{{ number_format($earning_stats['earnings_this_month']) }}</div>
+            <div class="text-2xl font-bold text-gray-800">${{ number_format($earning_stats['earnings_this_month']) }}</div>
           </div>
           <i class="fa-solid fa-calendar text-blue-600 text-2xl"></i>
         </div>
         <div class="bg-white border rounded-xl p-5 flex items-center justify-between">
           <div>
             <div class="text-sm text-gray-500">Avg per User</div>
-            <div class="text-2xl font-bold text-gray-800">₪{{ number_format($earning_stats['average_earning_per_user'], 2) }}</div>
+            <div class="text-2xl font-bold text-gray-800">${{ number_format($earning_stats['average_earning_per_user'], 2) }}</div>
           </div>
           <i class="fa-solid fa-chart-line text-fuchsia-600 text-2xl"></i>
         </div>
         <div class="bg-white border rounded-xl p-5 flex items-center justify-between">
           <div>
             <div class="text-sm text-gray-500">Total Withdrawals</div>
-            <div class="text-2xl font-bold text-gray-800">₪{{ number_format($withdrawal_stats['total_withdrawals']) }}</div>
+            <div class="text-2xl font-bold text-gray-800">${{ number_format($withdrawal_stats['total_withdrawals']) }}</div>
           </div>
           <i class="fa-solid fa-money-bill-transfer text-emerald-600 text-2xl"></i>
         </div>
         <div class="bg-white border rounded-xl p-5 flex items-center justify-between">
           <div>
             <div class="text-sm text-gray-500">Pending Withdrawals</div>
-            <div class="text-2xl font-bold text-gray-800">₪{{ number_format($withdrawal_stats['pending_withdrawals']) }}</div>
+            <div class="text-2xl font-bold text-gray-800">${{ number_format($withdrawal_stats['pending_withdrawals']) }}</div>
           </div>
           <i class="fa-solid fa-clock text-red-600 text-2xl"></i>
         </div>
         <div class="bg-white border rounded-xl p-5 flex items-center justify-between">
           <div>
             <div class="text-sm text-gray-500">Approved Withdrawals</div>
-            <div class="text-2xl font-bold text-gray-800">₪{{ number_format($withdrawal_stats['approved_withdrawals']) }}</div>
+            <div class="text-2xl font-bold text-gray-800">${{ number_format($withdrawal_stats['approved_withdrawals']) }}</div>
           </div>
           <i class="fa-solid fa-check-circle text-green-600 text-2xl"></i>
         </div>
@@ -139,17 +139,17 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div class="bg-green-100 p-6 rounded-xl text-center">
             <i class="fa-solid fa-dollar-sign text-3xl text-green-600 mb-2"></i>
-            <div class="text-2xl font-bold text-green-800">₪{{ number_format($earning_stats['total_earnings']) }}</div>
+            <div class="text-2xl font-bold text-green-800">${{ number_format($earning_stats['total_earnings']) }}</div>
             <div class="text-sm text-green-600">Total Earnings</div>
           </div>
           <div class="bg-blue-100 p-6 rounded-xl text-center">
             <i class="fa-solid fa-calendar text-3xl text-blue-600 mb-2"></i>
-            <div class="text-2xl font-bold text-blue-800">₪{{ number_format($earning_stats['earnings_this_month']) }}</div>
+            <div class="text-2xl font-bold text-blue-800">${{ number_format($earning_stats['earnings_this_month']) }}</div>
             <div class="text-sm text-blue-600">This Month</div>
           </div>
           <div class="bg-purple-100 p-6 rounded-xl text-center">
             <i class="fa-solid fa-chart-line text-3xl text-purple-600 mb-2"></i>
-            <div class="text-2xl font-bold text-purple-800">₪{{ number_format($earning_stats['average_earning_per_user'], 2) }}</div>
+            <div class="text-2xl font-bold text-purple-800">${{ number_format($earning_stats['average_earning_per_user'], 2) }}</div>
             <div class="text-sm text-purple-600">Avg per User</div>
           </div>
           <div class="bg-yellow-100 p-6 rounded-xl text-center">
@@ -166,17 +166,17 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div class="bg-yellow-100 p-6 rounded-xl text-center">
             <i class="fa-solid fa-money-bill-transfer text-3xl text-yellow-600 mb-2"></i>
-            <div class="text-2xl font-bold text-yellow-800">₪{{ number_format($withdrawal_stats['total_withdrawals']) }}</div>
+            <div class="text-2xl font-bold text-yellow-800">${{ number_format($withdrawal_stats['total_withdrawals']) }}</div>
             <div class="text-sm text-yellow-600">Total Withdrawals</div>
           </div>
           <div class="bg-red-100 p-6 rounded-xl text-center">
             <i class="fa-solid fa-clock text-3xl text-red-600 mb-2"></i>
-            <div class="text-2xl font-bold text-red-800">₪{{ number_format($withdrawal_stats['pending_withdrawals']) }}</div>
+            <div class="text-2xl font-bold text-red-800">${{ number_format($withdrawal_stats['pending_withdrawals']) }}</div>
             <div class="text-sm text-red-600">Pending</div>
           </div>
           <div class="bg-green-100 p-6 rounded-xl text-center">
             <i class="fa-solid fa-check-circle text-3xl text-green-600 mb-2"></i>
-            <div class="text-2xl font-bold text-green-800">₪{{ number_format($withdrawal_stats['approved_withdrawals']) }}</div>
+            <div class="text-2xl font-bold text-green-800">${{ number_format($withdrawal_stats['approved_withdrawals']) }}</div>
             <div class="text-sm text-green-600">Approved</div>
           </div>
           <div class="bg-blue-100 p-6 rounded-xl text-center">
@@ -211,7 +211,7 @@
                 <span class="capitalize">{{ $status->status }}</span>
                 <div class="text-right">
                   <div class="font-semibold">{{ $status->count }}</div>
-                  <div class="text-sm text-gray-600">₪{{ number_format($status->total) }}</div>
+                  <div class="text-sm text-gray-600">${{ number_format($status->total) }}</div>
                 </div>
               </div>
             @endforeach

@@ -7,6 +7,8 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Mail\Mailables\Content;
+use Illuminate\Mail\Mailables\Envelope;
 
 class WelcomeUserMail extends Mailable implements ShouldQueue
 {
@@ -19,10 +21,18 @@ class WelcomeUserMail extends Mailable implements ShouldQueue
         $this->user = $user;
     }
 
-    public function build()
+    public function envelope(): Envelope
     {
-        return $this->subject('Welcome to Pay-Per-Watch 🎉')
-                    ->view('emails.welcome_user');
+        return new Envelope(
+            subject: 'Welcome to StreamAdolla 🎬 Pay-Per-Watch',
+        );
+    }
+
+    public function content(): Content
+    {
+        return new Content(
+            view: 'emails.welcome_user',
+        );
     }
 }
 

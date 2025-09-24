@@ -92,6 +92,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('/reports', [AdminController::class, 'reports'])->name('reports');
     Route::get('/reports/export', [AdminController::class, 'exportReport'])->name('reports.export');
 
+    // Cheaters Routes
+    Route::get('/cheaters', [AdminController::class, 'cheaters'])->name('cheaters');
+
     // Suspension Management Routes
     Route::get('/suspensions', [AdminController::class, 'suspensions'])->name('suspensions');
     Route::get('/suspensions/{suspension}', [AdminController::class, 'showSuspension'])->name('suspensions.show');

@@ -28,6 +28,21 @@
       <i class="fa-solid fa-file-export mr-3"></i>
       <span>Reports</span>
     </a>
+
+    <!-- Suspensions Dropdown -->
+    <div>
+      <button id="suspensionsToggle" class="w-full flex items-center justify-between px-3 py-2 rounded hover:bg-gray-100 {{ request()->routeIs('admin.suspensions*') || request()->routeIs('admin.cheaters') ? 'bg-gray-100 font-semibold' : '' }}">
+        <span class="flex items-center">
+          <i class="fa-solid fa-shield-halved mr-3"></i>
+          Suspensions
+        </span>
+        <i class="fa-solid {{ request()->routeIs('admin.suspensions*') || request()->routeIs('admin.cheaters') ? 'fa-chevron-up' : 'fa-chevron-down' }}" id="suspensionsChevron"></i>
+      </button>
+      <div id="suspensionsMenu" class="ml-8 mt-1 space-y-1 {{ request()->routeIs('admin.suspensions*') || request()->routeIs('admin.cheaters') ? '' : 'hidden' }}">
+        <a href="{{ route('admin.suspensions') }}" class="block px-3 py-2 rounded hover:bg-gray-100 {{ request()->routeIs('admin.suspensions') ? 'bg-gray-100 font-semibold' : '' }}">All Suspensions</a>
+        <a href="{{ route('admin.cheaters') }}" class="block px-3 py-2 rounded hover:bg-gray-100 {{ request()->routeIs('admin.cheaters') ? 'bg-gray-100 font-semibold' : '' }}">Cheaters</a>
+      </div>
+    </div>
     <a href="{{ route('admin.settings.index') }}" class="flex items-center px-3 py-2 rounded hover:bg-gray-100 {{ request()->routeIs('admin.settings*') ? 'bg-gray-100 font-semibold' : '' }}">
       <i class="fa-solid fa-cog mr-3"></i>
       <span>Settings</span>
@@ -48,6 +63,20 @@
     sidebar.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
       if (window.innerWidth < 768) sidebar.classList.add('-translate-x-full');
     }));
+  })();
+
+  // Suspensions dropdown toggle
+  (function(){
+    const toggle = document.getElementById('suspensionsToggle');
+    const menu = document.getElementById('suspensionsMenu');
+    const chevron = document.getElementById('suspensionsChevron');
+    if (!toggle || !menu || !chevron) return;
+    toggle.addEventListener('click', function(){
+      const isHidden = menu.classList.contains('hidden');
+      menu.classList.toggle('hidden', !isHidden);
+      chevron.classList.toggle('fa-chevron-down', !isHidden);
+      chevron.classList.toggle('fa-chevron-up', isHidden);
+    });
   })();
 </script>
 

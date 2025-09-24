@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stream2Cash Dashboard</title>
+    <title>StreamAdolla Dashboard</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts - Inter -->
@@ -42,7 +42,8 @@
     <!-- Sidebar -->
     <aside id="sidebar" class="fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out bg-gray-800 w-64 flex flex-col shadow-lg z-40">
         <div class="p-6 text-2xl font-bold text-white text-center">
-            Stream2Cash
+            <img src="{{ asset('images/logo.png') }}" alt="StreamAdolla" class="rounded-lg w-full">
+
         </div>
 
         <!-- Navigation Links -->
@@ -329,7 +330,7 @@
 
     <!-- Footer -->
     <footer class="p-4 text-center text-gray-400 text-sm">
-        Copyright © 2025 Stream2Cash. All rights reserved.
+        Copyright © 2025 StreamAdolla. All rights reserved.
     </footer>
 
     <script>

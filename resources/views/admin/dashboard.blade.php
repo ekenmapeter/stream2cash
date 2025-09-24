@@ -5,7 +5,7 @@
 
   <!-- Admin Dashboard Header -->
   <section class="flex justify-center items-center py-14 px-4">
-    <div class="bg-white text-black rounded-2xl shadow-lg w-full max-w-4xl p-2">
+    <div class="bg-white text-black rounded-2xl shadow-lg w-full max-w-7xl p-2">
       <div class="text-center mb-8">
         <i class="fa-solid fa-crown text-6xl text-yellow-500 mb-4"></i>
         <h1 class="text-4xl font-bold text-gray-800 mb-2">Admin Dashboard</h1>
@@ -37,7 +37,7 @@
       </div>
 
       <!-- Quick Actions -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <a href="{{ route('admin.users') }}" class="bg-blue-700 hover:bg-blue-600 text-white p-6 rounded-xl flex items-center justify-between transition-colors">
           <div>
             <div class="font-semibold text-lg">Manage Users</div>

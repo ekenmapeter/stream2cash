@@ -773,6 +773,41 @@ class AdminController extends Controller
     }
 
     /**
+     * List users flagged for cheating attempts (grouped by user)
+     */
+    public function cheaters(Request $request)
+    {
+        $query = SuspensionOrchestration::cheating()->with('user')
+            ->select('user_id')
+            ->groupBy('user_id');
+
+        if ($request->filled('search')) {
+            $search = $request->get('search');
+            $query->whereHas('user', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        // Get paginated user IDs with cheating attempts
+        $userGroups = $query->paginate(15);
+
+        // Load aggregates for display
+        $userIds = $userGroups->pluck('user_id')->all();
+        $attempts = SuspensionOrchestration::cheating()
+            ->whereIn('user_id', $userIds)
+            ->with('video')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->groupBy('user_id');
+
+        return view('admin.cheaters.index', [
+            'userGroups' => $userGroups,
+            'attemptsByUser' => $attempts,
+        ]);
+    }
+
+    /**
      * Show suspensions management page
      */
     public function suspensions(Request $request)

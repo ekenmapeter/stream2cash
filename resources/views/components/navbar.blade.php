@@ -1,7 +1,9 @@
   <!-- Navbar -->
   <nav class="bg-[#0A1C64] fixed top-0 left-0 right-0 z-50" data-aos="fade-down">
     <div class="max-w-7xl mx-auto px-6 flex justify-between items-center py-4">
-      <div class="text-xl font-bold animate-pulse">Stream2Cash</div>
+      <div class="text-xl font-bold ">
+        <img src="{{ asset('images/logo.png') }}" alt="StreamAdolla" class="rounded-lg w-full">
+      </div>
 
       <!-- Desktop Menu -->
       <ul class="hidden md:flex gap-6 text-sm">

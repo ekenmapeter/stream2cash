@@ -1,6 +1,6 @@
 @extends('user.layouts.app')
 
-@section('title', 'Profile | Stream2Cash')
+@section('title', 'Profile | StreamAdolla')
 
 @section('content')
 <main class="flex-grow flex flex-col p-6 pt-0 gap-6">

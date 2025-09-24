@@ -49,12 +49,9 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        // Queue Welcome Mail to User
-    Mail::to($user->email)->queue(new WelcomeUserMail($user));
-
-    // Queue Notification Mail to Admin
+      // Queue Notification Mail to Admin
     Mail::to('admin@example.com')->queue(new NewUserAdminMail($user));
 
-        return redirect()->route('user.dashboard');
+        return redirect()->route('verification.notice');
     }
 }

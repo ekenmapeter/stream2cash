@@ -3,16 +3,20 @@
 namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Lab404\Impersonate\Models\Impersonate;
 use App\Models\Referral;
+use Illuminate\Support\Str;
+use App\Notifications\CustomVerifyEmail;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable, Impersonate;
 
     protected $fillable = [
+        'uid',
         'name',
         'email',
         'password',
@@ -42,6 +46,22 @@ class User extends Authenticatable
         'payout_meta' => 'array',
         'last_login_at' => 'datetime',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (empty($model->uid)) {
+                $model->uid = (string) Str::uuid();
+            }
+        });
+    }
+
+    public function getRouteKeyName()
+    {
+        return 'uid';
+    }
 
     // Relationships
     public function watches()
@@ -151,6 +171,14 @@ class User extends Authenticatable
     {
         // Only admins can impersonate
         return $this->role === 'admin';
+    }
+
+    /**
+     * Send the email verification notification.
+     */
+    public function sendEmailVerificationNotification()
+    {
+        $this->notify(new CustomVerifyEmail);
     }
 }
 
