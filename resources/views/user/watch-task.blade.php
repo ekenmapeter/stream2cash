@@ -4,7 +4,7 @@
 
 @section('content')
 <!-- Main Content Area -->
-<main class="flex-grow">
+<main class="flex-grow pt-20">
     <!-- Back Button -->
     <div class="p-6 pt-0">
         <a href="{{ route('user.tasks.details', $task) }}" class="inline-flex items-center text-blue-400 hover:text-blue-300 transition-colors">

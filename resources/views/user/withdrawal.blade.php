@@ -3,7 +3,7 @@
 @section('title', 'Withdrawal | StreamAdolla')
 
 @section('content')
-<main class="flex-grow flex flex-col p-6 pt-0 gap-6">
+<main class="flex-grow flex flex-col p-6 pt-20 gap-6">
 
     <header>
         <h1 class="text-2xl font-bold mb-1">Withdrawal</h1>

@@ -1,17 +1,22 @@
    <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-   <!-- Mobile Menu Button -->
-    <button id="mobile-menu-btn" class="lg:hidden fixed top-4 right-4 z-50 p-2 text-black bg-blue-800 rounded-md">
+ <!-- Brand bar -->
+  <div class="fixed top-0 left-0 right-0 z-40 bg-white shadow">
+     <div class="w-full px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+        <a href="{{ route('user.dashboard') }}" class="flex items-center gap-2">
+            <img src="{{ asset('images/logo.png') }}" alt="{{ config('app.name', 'StreamAdolla') }}" class="h-8 w-auto">
+        </a>
+        <!-- Mobile Menu Button -->
+    <button id="mobile-menu-btn" class="lg:hidden right-4 p-2 px-4 text-black bg-blue-800 text-white rounded-md">
         <i class="fa-solid fa-bars"></i>
     </button>
+    </div>
+</div>
+
 
     <!-- Sidebar -->
-    <aside id="sidebar" class="fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out bg-[#F4F4F4] w-64 flex flex-col shadow-lg z-40">
-        <div class="p-6 text-2xl font-bold text-black text-center">
-            <img src="{{ asset('images/logo.png') }}" alt="StreamAdolla" class="rounded-lg w-full">
+    <aside id="sidebar" class="fixed top-14 bottom-0 left-0 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out bg-[#F4F4F4] w-64 flex flex-col shadow-lg z-40">
 
-        </div>
             <!-- Impersonation Banner -->
             @if(Auth::check() && Auth::user()->isImpersonated())
             <div class="bg-purple-600 text-white py-2 px-4 text-center text-sm font-medium">

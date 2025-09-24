@@ -3,7 +3,7 @@
 @section('title', 'Tasks | StreamAdolla')
 
 @section('content')
-<main class="flex-grow p-6">
+<main class="flex-grow p-6 pt-20">
     <header class="mb-8">
         <h1 class="text-3xl font-bold text-black mb-2">Available Tasks</h1>
         <p class="text-black text-lg">Complete tasks to earn money.</p>
