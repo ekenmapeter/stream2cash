@@ -12,6 +12,9 @@ use App\Services\SuspensionService;
 use App\Services\SettingsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\UserWithdrawalRequested;
+use App\Mail\AdminWithdrawalNotification;
 use RealRashid\SweetAlert\Facades\Alert;
 
 class UserController extends Controller
@@ -352,8 +355,8 @@ class UserController extends Controller
         // Get real withdrawal data from database
         $withdrawal_data = [
             'balance' => $user->balance,
-            'min_withdrawal' => 1000, // You can make this configurable
-            'withdrawal_methods' => ['Bank Transfer', 'PayPal', 'Mobile Money'],
+            'min_withdrawal' => 100, // You can make this configurable
+            'withdrawal_methods' => ['Bank Transfer'],
             'recent_withdrawals' => $user->withdrawals()
                 ->orderBy('requested_at', 'desc')
                 ->take(10)
@@ -361,6 +364,69 @@ class UserController extends Controller
         ];
 
         return view('user.withdrawal', compact('withdrawal_data'));
+    }
+
+    /**
+     * Submit a withdrawal request.
+     */
+    public function requestWithdrawal(Request $request)
+    {
+        $user = Auth::user();
+
+        $validated = $request->validate([
+            'method' => 'required|in:Bank Transfer',
+            'amount' => 'required|numeric|min:100',
+            'bank_name' => 'required|string|max:255',
+            'account_name' => 'required|string|max:255',
+            'account_number' => 'required|string|max:30',
+        ]);
+
+        // Ensure sufficient balance
+        if ((float)$validated['amount'] > (float)$user->balance) {
+            return back()->withErrors(['amount' => 'Insufficient balance for this withdrawal amount.'])->withInput();
+        }
+
+        // Atomically deduct balance and create withdrawal
+        $withdrawal = \DB::transaction(function () use ($user, $validated) {
+            $user->balance = (float)$user->balance - (float)$validated['amount'];
+            if ($user->balance < 0) {
+                // Safety guard
+                throw new \RuntimeException('Insufficient balance.');
+            }
+            $user->save();
+
+            return $user->withdrawals()->create([
+                'amount' => $validated['amount'],
+                'status' => 'pending',
+                'method' => $validated['method'],
+                'requested_at' => now(),
+                'account_details' => [
+                    'bank_name' => $validated['bank_name'],
+                    'account_name' => $validated['account_name'],
+                    'account_number' => $validated['account_number'],
+                ],
+            ]);
+        });
+
+        // Send emails (user + admins)
+        try {
+            // Ensure we have fresh casts loaded
+            $withdrawal->refresh();
+            Mail::to($user->email)->queue(new UserWithdrawalRequested($user, $withdrawal));
+
+            $adminEmails = \App\Models\User::where('role', 'admin')->pluck('email')->filter()->all();
+            if (!empty($adminEmails)) {
+                Mail::to($adminEmails)->queue(new AdminWithdrawalNotification($user, $withdrawal));
+            }
+        } catch (\Throwable $e) {
+            // Fail silently to not block the flow; logs will capture errors
+            \Log::error('Withdrawal email send failed: '.$e->getMessage());
+        }
+
+        // Redirect to admin withdrawals page anchor (for convenience)
+        return redirect()->route('user.withdrawal')
+            ->with('success', 'Withdrawal request submitted. Admin will review shortly.')
+            ->with('admin_withdrawals_url', route('admin.withdrawals'));
     }
 
     /**

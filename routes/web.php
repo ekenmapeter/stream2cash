@@ -29,6 +29,7 @@ Route::middleware(['auth', 'verified', 'role:user', 'check.status', 'track.ip'])
     Route::post('/profile', [UserController::class, 'updateProfile'])->name('profile.update');
     Route::get('/avatar/{user}', [UserController::class, 'avatar'])->name('avatar');
     Route::get('/withdrawal', [UserController::class, 'withdrawal'])->name('withdrawal');
+    Route::post('/withdrawal', [UserController::class, 'requestWithdrawal'])->name('withdrawal.request');
 });
 
 // Video completion API routes

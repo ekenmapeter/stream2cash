@@ -4,14 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Concerns\HasUid;
 
 class Withdrawal extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUid;
 
     public $timestamps = false;
 
     protected $fillable = [
+        'uid',
         'user_id',
         'amount',
         'method',
@@ -22,6 +24,12 @@ class Withdrawal extends Model
     ];
 
     protected $dates = ['requested_at', 'processed_at'];
+
+    protected $casts = [
+        'account_details' => 'array',
+        'requested_at' => 'datetime',
+        'processed_at' => 'datetime',
+    ];
 
     public function user()
     {
