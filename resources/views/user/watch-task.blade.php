@@ -21,7 +21,7 @@
                 <p class="text-gray-200 mb-4">{{ Str::limit($task->description, 100) }}</p>
                 <div class="flex items-center justify-center space-x-6">
                     <div class="text-center">
-                        <div class="text-2xl font-bold text-yellow-500">₦{{ number_format($task->reward_per_view, 2) }}</div>
+                        <div class="text-2xl font-bold text-yellow-500">${{ number_format($task->reward_per_view, 2) }}</div>
                         <div class="text-sm text-gray-200">Reward</div>
                     </div>
                     <div class="text-center">
@@ -68,7 +68,7 @@
                         <div class="text-center text-white">
                             <i class="fa-solid fa-check-circle text-8xl mb-6"></i>
                             <h3 class="text-4xl font-bold mb-4">Task Completed!</h3>
-                            <p class="text-2xl mb-6">You earned ₦{{ number_format($task->reward_per_view, 2) }}</p>
+                            <p class="text-2xl mb-6">You earned ${{ number_format($task->reward_per_view, 2) }}</p>
                             <div class="space-x-4">
                                 <a href="{{ route('user.tasks') }}" class="bg-blue-700 hover:bg-blue-600 text-white py-3 px-6 rounded-lg transition-colors inline-block">
                                     <i class="fa-solid fa-list mr-2"></i>View All Tasks
@@ -107,7 +107,7 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-gray-200">
                                 <div class="flex items-center space-x-2">
                                     <i class="fa-solid fa-check text-green-400"></i>
-                                    <span>Watch at least 85% of the video</span>
+                                    <span>Watch at least {{ $videoSettings['min_watch_percentage'] ?? 85 }}% of the video</span>
                                 </div>
                                 <div class="flex items-center space-x-2">
                                     <i class="fa-solid fa-check text-green-400"></i>
@@ -115,11 +115,11 @@
                                 </div>
                                 <div class="flex items-center space-x-2">
                                     <i class="fa-solid fa-check text-green-400"></i>
-                                    <span>Limit seeking to 3 times maximum</span>
+                                    <span>Limit seeking to {{ $videoSettings['max_seek_count'] ?? 3 }} times maximum</span>
                                 </div>
                                 <div class="flex items-center space-x-2">
                                     <i class="fa-solid fa-check text-green-400"></i>
-                                    <span>Limit pausing to 5 times maximum</span>
+                                    <span>Limit pausing to {{ $videoSettings['max_pause_count'] ?? 5 }} times maximum</span>
                                 </div>
                             </div>
                         </div>
@@ -154,10 +154,10 @@ let isTabVisible = true;
 let watchEvents = [];
 let heartbeatInterval;
 let lastHeartbeatTime = Date.now();
-let minimumWatchPercentage = 85; // User must watch at least 85% of video
-let maximumSeekCount = {{ $videoSettings['allow_seeking'] ? '999' : '0' }}; // Based on settings
-let maximumPauseCount = {{ $videoSettings['allow_pausing'] ? '999' : '0' }}; // Based on settings
-let heartbeatIntervalMs = {{ $videoSettings['heartbeat_interval'] * 1000 }}; // Convert to milliseconds
+let minimumWatchPercentage = {{ $videoSettings['min_watch_percentage'] ?? 85 }}; // Match backend setting
+let maximumSeekCount = {{ isset($videoSettings['max_seek_count']) ? (int)$videoSettings['max_seek_count'] : ($videoSettings['allow_seeking'] ? 999 : 0) }};
+let maximumPauseCount = {{ isset($videoSettings['max_pause_count']) ? (int)$videoSettings['max_pause_count'] : ($videoSettings['allow_pausing'] ? 999 : 0) }};
+let heartbeatIntervalMs = {{ ($videoSettings['heartbeat_interval'] ?? 10) * 1000 }}; // Convert to milliseconds
 
 // Countdown function
 function startCountdown() {
@@ -470,7 +470,7 @@ function completeVideo() {
                 Swal.fire({
                     icon: 'success',
                     title: 'Congratulations!',
-                    html: `You earned ₦${data.points.toFixed(2)}!<br>Your new balance is ₦${data.new_balance.toFixed(2)}`,
+                    html: `You earned $${data.points.toFixed(2)}!<br>Your new balance is $${data.new_balance.toFixed(2)}`,
                     toast: true,
                     position: 'top-end',
                     showConfirmButton: false,

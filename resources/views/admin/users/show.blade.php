@@ -69,19 +69,19 @@
           <div class="space-y-3">
             <div class="flex justify-between">
               <span class="text-gray-600">Current Balance:</span>
-              <span class="font-medium text-green-600">₦ {{ number_format($user->balance, 2) }}</span>
+              <span class="font-medium text-green-600">$ {{ number_format($user->balance, 2) }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-gray-600">Total Earnings:</span>
-              <span class="font-medium">₦ {{ number_format($user_stats['total_earnings'], 2) }}</span>
+              <span class="font-medium">$ {{ number_format($user_stats['total_earnings'], 2) }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-gray-600">Total Withdrawals:</span>
-              <span class="font-medium">₦ {{ number_format($user_stats['total_withdrawals'], 2) }}</span>
+              <span class="font-medium">$ {{ number_format($user_stats['total_withdrawals'], 2) }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-gray-600">Pending Withdrawals:</span>
-              <span class="font-medium text-yellow-600">₦ {{ number_format($user_stats['pending_withdrawals'], 2) }}</span>
+              <span class="font-medium text-yellow-600">$ {{ number_format($user_stats['pending_withdrawals'], 2) }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-gray-600">Tasks Completed:</span>
@@ -132,10 +132,10 @@
               <tbody>
                 @foreach($user_withdrawals as $withdrawal)
                   <tr class="border-b">
-                    <td class="py-2 font-medium">₦ {{ number_format($withdrawal->amount, 2) }}</td>
+                    <td class="py-2 font-medium">$ {{ number_format($withdrawal->amount, 2) }}</td>
                     <td class="py-2">
                       <span class="px-2 py-1 text-xs font-semibold rounded-full
-                        {{ $withdrawal->status === 'completed' ? 'bg-green-100 text-green-800' :
+                        {{ $withdrawal->status === 'approved' ? 'bg-green-100 text-green-800' :
                            ($withdrawal->status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800') }}">
                         {{ ucfirst($withdrawal->status) }}
                       </span>
@@ -174,7 +174,7 @@
               <tbody>
                 @foreach($user_earnings as $earning)
                   <tr class="border-b">
-                    <td class="py-2 font-medium text-green-600">₦ {{ number_format($earning->amount, 2) }}</td>
+                    <td class="py-2 font-medium text-green-600">$ {{ number_format($earning->amount, 2) }}</td>
                     <td class="py-2">{{ $earning->source ?? 'Task Completion' }}</td>
                     <td class="py-2 text-gray-600">{{ $earning->created_at->format('M d, Y') }}</td>
                     <td class="py-2">
@@ -234,19 +234,19 @@
       <!-- Actions -->
       <div class="space-y-4">
         <!-- Status Management -->
-        <div class="flex flex-wrap gap-3">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
           @if($user->status === 'active')
             <!-- Suspend User -->
-            <button onclick="openSuspendModal()" class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg transition-colors">
+            <button onclick="openSuspendModal()" class="bg-yellow-600 hover:bg-yellow-700 text-white px-2 py-1 rounded-lg transition-colors">
               <i class="fa-solid fa-pause mr-2"></i>Suspend User
             </button>
             <!-- Block User -->
-            <button onclick="openBlockModal()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors">
+            <button onclick="openBlockModal()" class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded-lg transition-colors">
               <i class="fa-solid fa-ban mr-2"></i>Block User
             </button>
           @elseif($user->status === 'suspended')
             <!-- Activate User -->
-            <form method="POST" action="{{ route('admin.users.activate', $user) }}" class="inline">
+            <form method="POST" action="{{ route('admin.users.activate', $user) }}" class="contents">
               @csrf
               @method('PATCH')
               <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
@@ -254,15 +254,15 @@
               </button>
             </form>
             <!-- Block User -->
-            <button onclick="openBlockModal()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors">
+            <button onclick="openBlockModal()" class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded-lg transition-colors">
               <i class="fa-solid fa-ban mr-2"></i>Block User
             </button>
           @elseif($user->status === 'blocked')
             <!-- Activate User -->
-            <form method="POST" action="{{ route('admin.users.activate', $user) }}" class="inline">
+            <form method="POST" action="{{ route('admin.users.activate', $user) }}" class="contents">
               @csrf
               @method('PATCH')
-              <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
+              <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded-lg transition-colors">
                 <i class="fa-solid fa-check mr-2"></i>Activate User
               </button>
             </form>
@@ -274,7 +274,7 @@
           @if($user->role === 'user' && $user->status === 'active')
             <form method="POST" action="{{ route('admin.impersonate', $user) }}" class="inline">
               @csrf
-              <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors"
+              <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-2 py-1 rounded-lg transition-colors"
                       onclick="return confirm('Are you sure you want to impersonate this user?')">
                 <i class="fa-solid fa-user-secret mr-2"></i>Impersonate User
               </button>
@@ -285,7 +285,7 @@
                   onsubmit="return confirm('Are you sure you want to delete this user? This action cannot be undone.')">
               @csrf
               @method('DELETE')
-              <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors">
+              <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded-lg transition-colors">
                 <i class="fa-solid fa-trash mr-2"></i>Delete User
               </button>
             </form>

@@ -59,6 +59,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::patch('/ip-records/{ipRecord}/mark-suspicious', [AdminController::class, 'markIpSuspicious'])->name('ip-records.mark-suspicious');
     Route::patch('/ip-records/{ipRecord}/clear-suspicion', [AdminController::class, 'clearIpSuspicion'])->name('ip-records.clear-suspicion');
 
+    // User Action Logs Routes
+    Route::get('/user-action-logs', [AdminController::class, 'userActionLogs'])->name('user-action-logs');
+
     // Impersonation Routes
     Route::post('/impersonate/{user}', [AdminController::class, 'impersonate'])->name('impersonate');
     Route::post('/stop-impersonate', [AdminController::class, 'stopImpersonate'])->name('stop-impersonate');

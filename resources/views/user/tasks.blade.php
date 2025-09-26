@@ -47,10 +47,7 @@
             @php $isCompleted = isset($completed_task_ids) && in_array($task->id, $completed_task_ids); @endphp
 
             @php
-                // Check if it's a YouTube URL
-                $isYouTube = preg_match('/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/', $task->url, $matches);
-                $youtubeId = $isYouTube ? $matches[1] : null;
-                $thumbnailUrl = $isYouTube ? "https://img.youtube.com/vi/{$youtubeId}/maxresdefault.jpg" : ($task->thumbnail_url ?? $task->thumbnail ?? 'https://placehold.co/600x300/1E3A8A/FFFFFF?text=Video');
+                $thumbnailUrl = $task->thumbnail ?: 'https://placehold.co/600x300/1E3A8A/FFFFFF?text=Task+Image';
             @endphp
 
             @if($isCompleted)
@@ -63,32 +60,14 @@
                 </div>
             @else
                 <div class="relative w-full h-48 bg-black">
-                    <div class="absolute inset-0 flex items-center justify-center text-white bg-black/40 pointer-events-none" data-lazy-overlay="{{ $task->id }}">
-                        <div class="flex flex-col items-center">
-                            <i class="fa-solid fa-spinner fa-spin text-4xl text-blue-500 mb-2"></i>
-                            <p class="text-sm">Preparing video...</p>
-                        </div>
-                    </div>
-                    @if($isYouTube)
-                        <div id="youtube-player-{{ $task->id }}" class="w-full h-full lazy-youtube" data-youtube-id="{{ $youtubeId }}" data-task-id="{{ $task->id }}"></div>
-                    @else
-                        <video
-                            id="video-{{ $task->id }}"
-                            class="w-full h-full object-cover lazy-video"
-                            controls
-                            preload="none"
-                            data-video-id="{{ $task->id }}"
-                            poster="{{ $thumbnailUrl }}"
-                            data-src="{{ $task->url }}"
-                        >
-                            </video>
-                    @endif
+
+                    <img src="{{ $thumbnailUrl }}" alt="{{ $task->title }}" class="w-full h-48 object-cover" loading="lazy">
 
                     <div id="completion-overlay-{{ $task->id }}" class="absolute inset-0 bg-green-900 bg-opacity-90 flex items-center justify-center hidden">
                         <div class="text-center text-white">
                             <i class="fa-solid fa-check-circle text-6xl mb-4"></i>
                             <h3 class="text-2xl font-bold mb-2">Task Completed!</h3>
-                            <p class="text-lg">You earned ₦{{ number_format($task->reward_per_view, 2) }}</p>
+                            <p class="text-lg">You earned ${{ number_format($task->reward_per_view, 2) }}</p>
                         </div>
                     </div>
                 </div>
@@ -99,7 +78,7 @@
                 <p class="text-gray-200 text-xs mb-4">{{ Str::limit($task->description, 120) }}</p>
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex items-center space-x-2">
-                    <span class="text-2xl font-bold text-yellow-500">₦{{ number_format($task->reward_per_view, 2) }}</span>
+                    <span class="text-2xl font-bold text-yellow-500">${{ number_format($task->reward_per_view, 2) }}</span>
                     </div>
                     <div class="flex flex-col items-end gap-1 text-right">
                          <div class="flex items-center gap-2">
@@ -258,7 +237,7 @@ function completeVideo(videoId) {
                 Swal.fire({
                     icon: 'success',
                     title: 'Congratulations!',
-                    html: `You earned ₦${data.points.toFixed(2)}!<br>Your new balance is ₦${data.new_balance.toFixed(2)}`,
+                    html: `You earned $${data.points.toFixed(2)}!<br>Your new balance is $${data.new_balance.toFixed(2)}`,
                     toast: true,
                     position: 'top-end',
                     showConfirmButton: false,

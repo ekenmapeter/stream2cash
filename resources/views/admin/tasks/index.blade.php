@@ -63,7 +63,7 @@
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    ₦{{ number_format($task->reward_per_view, 2) }}
+                    ${{ number_format($task->reward_per_view, 2) }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   <div class="flex items-center">

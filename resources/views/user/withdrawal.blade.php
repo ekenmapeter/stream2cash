@@ -14,13 +14,13 @@
             <div class="bg-blue-800 p-6 rounded-xl shadow-lg flex flex-col items-center">
                 <i class="fa-solid fa-sack-dollar text-4xl text-blue-400 mb-3"></i>
                 <div class="text-sm text-blue-200">Available Balance</div>
-                <div class="text-3xl font-bold mt-1">₦{{ number_format($withdrawal_data['balance']) }}</div>
+                <div class="text-3xl font-bold mt-1">${{ number_format($withdrawal_data['balance']) }}</div>
             </div>
 
             <div class="bg-white p-6 rounded-xl shadow-lg flex flex-col items-center text-black">
                 <i class="fa-solid fa-circle-minus text-4xl text-blue-800 mb-3"></i>
                 <div class="text-sm text-gray-500">Minimum Withdrawal</div>
-                <div class="text-3xl font-bold mt-1">₦{{ number_format($withdrawal_data['min_withdrawal']) }}</div>
+                <div class="text-3xl font-bold mt-1">${{ number_format($withdrawal_data['min_withdrawal']) }}</div>
             </div>
 
             <div class="bg-white p-6 rounded-xl shadow-lg flex flex-col items-center text-black">
@@ -60,7 +60,7 @@
                     </select>
                 </div>
                 <div>
-                    <label for="amount" class="block text-sm font-medium text-gray-300 mb-2">Amount (₦)</label>
+                    <label for="amount" class="block text-sm font-medium text-gray-300 mb-2">Amount ($)</label>
                     <input type="number" id="amount" name="amount" min="{{ $withdrawal_data['min_withdrawal'] }}" max="{{ $withdrawal_data['balance'] }}" placeholder="e.g., 5000" value="{{ old('amount') }}" class="w-full bg-blue-800 border-none rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-400" required>
                 </div>
                 <!-- Bank Transfer Details -->
@@ -106,7 +106,7 @@
                                 @php
                                     $status = strtolower($w->status ?? '');
                                     $badge = match($status) {
-                                        'completed', 'approved' => 'bg-green-700 text-green-100',
+                                        'approved' => 'bg-green-700 text-green-100',
                                         'pending' => 'bg-yellow-700 text-yellow-100',
                                         'failed', 'rejected' => 'bg-red-700 text-red-100',
                                         default => 'bg-gray-600 text-gray-100'

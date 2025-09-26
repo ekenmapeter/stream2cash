@@ -18,6 +18,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'track.ip' => \App\Http\Middleware\TrackUserIp::class,
             'check.status' => \App\Http\Middleware\CheckUserStatus::class,
         ]);
+        // Globally add form submission logger to web middleware group
+        $middleware->appendToGroup('web', [
+            \App\Http\Middleware\LogFormSubmission::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

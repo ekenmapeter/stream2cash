@@ -231,7 +231,7 @@
         <p>We've successfully received your withdrawal request. Your funds are being processed and will be sent to you shortly.</p>
 
         <div class="withdrawal-details">
-            <div class="amount">₦{{ number_format($withdrawal->amount, 2) }}</div>
+            <div class="amount">${{ number_format($withdrawal->amount, 2) }}</div>
             <div class="detail-row">
                 <span class="detail-label">Withdrawal Method:</span>
                 <span class="detail-value">{{ $withdrawal->method }}</span>

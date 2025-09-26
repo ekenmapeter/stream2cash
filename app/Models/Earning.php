@@ -3,13 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Concerns\HasUid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Earning extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUid;
 
     protected $fillable = [
+        'uid',
         'user_id',
         'video_id',
         'amount',

@@ -10,6 +10,7 @@ use App\Models\Earning;
 use App\Models\UserVideoWatch;
 use App\Models\UserIpRecord;
 use App\Models\SuspensionOrchestration;
+use App\Models\UserActionLog;
 use App\Services\SuspensionService;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
@@ -18,6 +19,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\WithdrawalApproved;
+use App\Mail\WithdrawalRejected;
+use App\Mail\BalanceUpdated;
 
 class AdminController extends Controller
 {
@@ -172,21 +177,60 @@ class AdminController extends Controller
         $user->balance = $request->balance;
         $user->save();
 
-        // Log the balance change
-        \Log::info("Admin {$request->user()->name} updated user {$user->name} balance from {$old_balance} to {$request->balance}. Reason: {$request->reason}");
+        // Log the action
+        UserActionLog::logAction(
+            adminId: Auth::id(),
+            targetUserId: $user->id,
+            action: 'update_balance',
+            description: "Updated user balance from ₦{$old_balance} to ₦{$request->balance}. Reason: {$request->reason}",
+            oldData: ['balance' => $old_balance],
+            newData: ['balance' => $request->balance, 'reason' => $request->reason],
+            ipAddress: $request->ip(),
+            userAgent: $request->userAgent()
+        );
 
-        return redirect()->back()->with('success', 'User balance updated successfully.');
+        // Send balance update email to user
+        try {
+            Mail::to($user->email)->send(new BalanceUpdated(
+                $user,
+                $old_balance,
+                $request->balance,
+                $request->reason,
+                $request->user()->name
+            ));
+        } catch (\Exception $e) {
+            Log::error('Failed to send balance update email: ' . $e->getMessage());
+        }
+
+        return redirect()->back()->with('success', 'User balance updated successfully and user has been notified via email.');
     }
 
     /**
      * Delete user
      */
-    public function deleteUser(User $user)
+    public function deleteUser(Request $request, User $user)
     {
         // Prevent admin from deleting themselves
         if ($user->id === Auth::id()) {
             return redirect()->back()->with('error', 'You cannot delete your own account.');
         }
+
+        // Log the action before deletion
+        UserActionLog::logAction(
+            adminId: Auth::id(),
+            targetUserId: $user->id,
+            action: 'delete',
+            description: "Deleted user account",
+            oldData: [
+                'name' => $user->name,
+                'email' => $user->email,
+                'status' => $user->status,
+                'balance' => $user->balance
+            ],
+            newData: null,
+            ipAddress: $request->ip(),
+            userAgent: $request->userAgent()
+        );
 
         $user->delete();
 
@@ -211,7 +255,20 @@ class AdminController extends Controller
             return redirect()->back()->with('error', 'You cannot suspend your own account.');
         }
 
+        $oldStatus = $user->status;
         $user->suspend($request->reason);
+
+        // Log the action
+        UserActionLog::logAction(
+            adminId: Auth::id(),
+            targetUserId: $user->id,
+            action: 'suspend',
+            description: "Suspended user. Reason: {$request->reason}",
+            oldData: ['status' => $oldStatus],
+            newData: ['status' => 'suspended', 'reason' => $request->reason],
+            ipAddress: $request->ip(),
+            userAgent: $request->userAgent()
+        );
 
         return redirect()->back()->with('success', 'User suspended successfully.');
     }
@@ -234,7 +291,20 @@ class AdminController extends Controller
             return redirect()->back()->with('error', 'You cannot block your own account.');
         }
 
+        $oldStatus = $user->status;
         $user->block($request->reason);
+
+        // Log the action
+        UserActionLog::logAction(
+            adminId: Auth::id(),
+            targetUserId: $user->id,
+            action: 'block',
+            description: "Blocked user. Reason: {$request->reason}",
+            oldData: ['status' => $oldStatus],
+            newData: ['status' => 'blocked', 'reason' => $request->reason],
+            ipAddress: $request->ip(),
+            userAgent: $request->userAgent()
+        );
 
         return redirect()->back()->with('success', 'User blocked successfully.');
     }
@@ -242,11 +312,65 @@ class AdminController extends Controller
     /**
      * Activate user
      */
-    public function activateUser(User $user)
+    public function activateUser(Request $request, User $user)
     {
+        $oldStatus = $user->status;
         $user->activate();
 
+        // Log the action
+        UserActionLog::logAction(
+            adminId: Auth::id(),
+            targetUserId: $user->id,
+            action: 'activate',
+            description: "Activated user",
+            oldData: ['status' => $oldStatus],
+            newData: ['status' => 'active'],
+            ipAddress: $request->ip(),
+            userAgent: $request->userAgent()
+        );
+
         return redirect()->back()->with('success', 'User activated successfully.');
+    }
+
+    /**
+     * Show user action logs
+     */
+    public function userActionLogs(Request $request)
+    {
+        $query = UserActionLog::with(['admin', 'targetUser'])
+            ->orderBy('created_at', 'desc');
+
+        // Filter by action
+        if ($request->has('action') && $request->action) {
+            $query->where('action', $request->action);
+        }
+
+        // Filter by admin
+        if ($request->has('admin_id') && $request->admin_id) {
+            $query->where('admin_id', $request->admin_id);
+        }
+
+        // Filter by target user
+        if ($request->has('target_user_id') && $request->target_user_id) {
+            $query->where('target_user_id', $request->target_user_id);
+        }
+
+        // Filter by date range
+        if ($request->has('date_from') && $request->date_from) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+
+        if ($request->has('date_to') && $request->date_to) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        $logs = $query->paginate(20);
+
+        // Get filter options
+        $admins = User::where('role', 'admin')->get();
+        $actions = UserActionLog::distinct()->pluck('action');
+
+        return view('admin.users.action-logs', compact('logs', 'admins', 'actions'));
     }
 
     /**
@@ -290,7 +414,7 @@ class AdminController extends Controller
     /**
      * Impersonate a user
      */
-    public function impersonate(User $user)
+    public function impersonate(Request $request, User $user)
     {
         // Check if current user can impersonate
         if (!Auth::user()->canImpersonate()) {
@@ -301,6 +425,18 @@ class AdminController extends Controller
         if (!$user->canBeImpersonated()) {
             return redirect()->back()->with('error', 'This user cannot be impersonated.');
         }
+
+        // Log the action
+        UserActionLog::logAction(
+            adminId: Auth::id(),
+            targetUserId: $user->id,
+            action: 'impersonate',
+            description: "Started impersonating user {$user->name}",
+            oldData: null,
+            newData: ['impersonated_user' => $user->name, 'impersonated_user_id' => $user->id],
+            ipAddress: $request->ip(),
+            userAgent: $request->userAgent()
+        );
 
         // Start impersonation
         Auth::user()->impersonate($user);
@@ -314,6 +450,23 @@ class AdminController extends Controller
     public function stopImpersonate()
     {
         if (Auth::user()->isImpersonated()) {
+            // Log the action before leaving impersonation
+            try {
+                $impersonatorId = Auth::user()->id;
+                // Best-effort: target user not directly available; store minimal context
+                UserActionLog::logAction(
+                    adminId: $impersonatorId,
+                    targetUserId: $impersonatorId,
+                    action: 'stop_impersonate',
+                    description: 'Stopped impersonating current user session',
+                    oldData: null,
+                    newData: null,
+                    ipAddress: request()->ip(),
+                    userAgent: request()->userAgent()
+                );
+            } catch (\Throwable $e) {
+                \Log::warning('Failed to log stop impersonation: '.$e->getMessage());
+            }
             Auth::user()->leaveImpersonation();
             return redirect()->route('admin.users')->with('success', 'Stopped impersonating user.');
         }
@@ -362,14 +515,21 @@ class AdminController extends Controller
             'description' => 'required|string',
             'url' => 'required|url',
             'reward_per_view' => 'required|numeric|min:0.01',
-            'status' => 'required|in:active,inactive'
+            'status' => 'required|in:active,inactive',
+            'thumbnail' => 'nullable|image|max:2048'
         ]);
 
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        Video::create($request->all());
+        $data = $request->only(['title','description','url','reward_per_view','status']);
+        if ($request->hasFile('thumbnail')) {
+            $path = $request->file('thumbnail')->store('task-thumbnails', 'public');
+            $data['thumbnail'] = '/storage/' . $path;
+        }
+
+        Video::create($data);
 
         return redirect()->route('admin.tasks')->with('success', 'Task created successfully.');
     }
@@ -529,14 +689,21 @@ class AdminController extends Controller
             'description' => 'required|string',
             'url' => 'required|url',
             'reward_per_view' => 'required|numeric|min:0.01',
-            'status' => 'required|in:active,inactive'
+            'status' => 'required|in:active,inactive',
+            'thumbnail' => 'nullable|image|max:2048'
         ]);
 
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $task->update($request->all());
+        $data = $request->only(['title','description','url','reward_per_view','status']);
+        if ($request->hasFile('thumbnail')) {
+            $path = $request->file('thumbnail')->store('task-thumbnails', 'public');
+            $data['thumbnail'] = '/storage/' . $path;
+        }
+
+        $task->update($data);
 
         return redirect()->back()->with('success', 'Task updated successfully.');
     }
@@ -574,7 +741,7 @@ class AdminController extends Controller
             $query->where('status', $request->status);
         }
 
-        $withdrawals = $query->latest()->paginate(5);
+        $withdrawals = $query->orderBy('requested_at', 'desc')->paginate(5);
 
         return view('admin.withdrawals.index', compact('withdrawals'));
     }
@@ -609,7 +776,30 @@ class AdminController extends Controller
             'processed_by' => Auth::id()
         ]);
 
-        return redirect()->back()->with('success', 'Withdrawal approved successfully.');
+        // Log action
+        try {
+            UserActionLog::logAction(
+                adminId: Auth::id(),
+                targetUserId: $withdrawal->user_id,
+                action: 'withdrawal_approve',
+                description: 'Approved withdrawal request',
+                oldData: ['withdrawal_id' => $withdrawal->id, 'previous_status' => 'pending'],
+                newData: ['status' => 'approved', 'amount' => $withdrawal->amount],
+                ipAddress: $request->ip(),
+                userAgent: $request->userAgent()
+            );
+        } catch (\Throwable $e) {
+            \Log::warning('Failed to log withdrawal approval: '.$e->getMessage());
+        }
+
+        // Send approval email to user
+        try {
+            Mail::to($withdrawal->user->email)->send(new WithdrawalApproved($withdrawal->user, $withdrawal));
+        } catch (\Exception $e) {
+            Log::error('Failed to send withdrawal approval email: ' . $e->getMessage());
+        }
+
+        return redirect()->back()->with('success', 'Withdrawal approved successfully and user has been notified via email.');
     }
 
     /**
@@ -637,7 +827,30 @@ class AdminController extends Controller
             'processed_by' => Auth::id()
         ]);
 
-        return redirect()->back()->with('success', 'Withdrawal rejected and amount refunded to user.');
+        // Log action
+        try {
+            UserActionLog::logAction(
+                adminId: Auth::id(),
+                targetUserId: $withdrawal->user_id,
+                action: 'withdrawal_reject',
+                description: 'Rejected withdrawal request',
+                oldData: ['withdrawal_id' => $withdrawal->id, 'previous_status' => 'pending'],
+                newData: ['status' => 'rejected', 'amount' => $withdrawal->amount, 'reason' => $request->rejection_reason],
+                ipAddress: $request->ip(),
+                userAgent: $request->userAgent()
+            );
+        } catch (\Throwable $e) {
+            \Log::warning('Failed to log withdrawal rejection: '.$e->getMessage());
+        }
+
+        // Send rejection email to user
+        try {
+            Mail::to($withdrawal->user->email)->send(new WithdrawalRejected($withdrawal->user, $withdrawal));
+        } catch (\Exception $e) {
+            Log::error('Failed to send withdrawal rejection email: ' . $e->getMessage());
+        }
+
+        return redirect()->back()->with('success', 'Withdrawal rejected, amount refunded to user, and user has been notified via email.');
     }
 
     /**

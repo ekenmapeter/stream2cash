@@ -5,9 +5,9 @@
 
   <!-- Login Form -->
   <section class="flex justify-center items-center py-20 px-4">
-    <div class="bg-white text-black rounded-2xl shadow-lg w-full max-w-md p-8">
-      <h2 class="text-3xl font-bold text-center mb-2">{{ !empty($isAdmin) ? 'Admin Login' : 'Login' }}</h2>
-      <p class="text-center text-sm mb-6">Please, enter your username and password</p>
+    <div class="{{ !empty($isAdmin) ? 'bg-gradient-to-br from-red-50 to-red-100 border-2 border-red-200' : 'bg-white' }} text-black rounded-2xl shadow-lg w-full max-w-md p-8">
+      <h2 class="text-3xl font-bold text-center mb-2 {{ !empty($isAdmin) ? 'text-red-700' : '' }}">{{ !empty($isAdmin) ? 'Admin Login' : 'Login' }}</h2>
+      <p class="text-center text-sm mb-6 {{ !empty($isAdmin) ? 'text-red-600' : '' }}">Please, enter your username and password</p>
 
     <!-- Session Status -->
       @if (session('status'))
@@ -73,8 +73,8 @@
         </div>
 
         <!-- Login Button -->
-        <button type="submit" class="w-full bg-[#0A1C64] hover:bg-[#162996] text-white py-3 rounded-md font-semibold mb-4 transition-all duration-200 transform hover:scale-105 active:scale-95 active:bg-[#0f1e66]">
-          Login
+        <button type="submit" class="w-full {{ !empty($isAdmin) ? 'bg-red-600 hover:bg-red-700 active:bg-red-800' : 'bg-[#0A1C64] hover:bg-[#162996] active:bg-[#0f1e66]' }} text-white py-3 rounded-md font-semibold mb-4 transition-all duration-200 transform hover:scale-105 active:scale-95">
+          {{ !empty($isAdmin) ? 'Admin Login' : 'Login' }}
         </button>
       </form>
 
@@ -85,9 +85,9 @@
       </div>
 
       <!-- Google Login -->
-      <button class="w-full flex items-center justify-center bg-[#0A1C64] hover:bg-[#162996] text-white py-3 rounded-md font-semibold transition-all duration-200 transform hover:scale-105 active:scale-95 active:bg-[#0f1e66]">
+      <button class="w-full flex items-center justify-center {{ !empty($isAdmin) ? 'bg-red-600 hover:bg-red-700 active:bg-red-800' : 'bg-[#0A1C64] hover:bg-[#162996] active:bg-[#0f1e66]' }} text-white py-3 rounded-md font-semibold transition-all duration-200 transform hover:scale-105 active:scale-95">
         <img src="https://cdn-icons-png.flaticon.com/512/281/281764.png" alt="Google" class="w-5 h-5 mr-2">
-        Login with Google
+        {{ !empty($isAdmin) ? 'Admin Login with Google' : 'Login with Google' }}
       </button>
 
       <!-- Register Link -->

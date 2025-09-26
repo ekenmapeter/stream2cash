@@ -85,7 +85,7 @@
                 <div class="text-sm text-gray-300">Tasks Completed</div>
             </div>
             <div class="bg-white/10 p-4 rounded-lg text-center">
-                <div class="text-4xl font-extrabold text-green-400 mb-1">₦{{ number_format($stats['total_earned'], 2) }}</div>
+                <div class="text-4xl font-extrabold text-green-400 mb-1">${{ number_format($stats['total_earned'], 2) }}</div>
                 <div class="text-sm text-gray-300">Total Earned</div>
             </div>
             <div class="bg-white/10 p-4 rounded-lg text-center">
@@ -113,12 +113,12 @@
                         <tr class="border-b border-blue-800 text-sm">
                             <td class="py-3 px-4 font-semibold {{ $a['type'] === 'earning' ? 'text-green-400' : 'text-red-400' }}">{{ ucfirst($a['type']) }}</td>
                             <td class="py-3 px-4">{{ $a['description'] }}</td>
-                            <td class="py-3 px-4 font-semibold {{ $a['type'] === 'earning' ? 'text-green-400' : 'text-red-400' }}">{{ $a['type'] === 'earning' ? '+' : '-' }}₦{{ number_format($a['amount'], 2) }}</td>
+                            <td class="py-3 px-4 font-semibold {{ $a['type'] === 'earning' ? 'text-green-400' : 'text-red-400' }}">{{ $a['type'] === 'earning' ? '+' : '-' }}${{ number_format($a['amount'], 2) }}</td>
                             <td class="py-3 px-4 hidden sm:table-cell">
                                 <span class="px-2 py-1 rounded-full text-xs font-medium
-                                    {{ ($a['status'] ?? 'completed') === 'completed' ? 'bg-green-700 text-green-100' :
+                                    {{ ($a['status'] ?? 'approved') === 'approved' ? 'bg-green-700 text-green-100' :
                                        'bg-yellow-700 text-yellow-100' }}">
-                                    {{ ucfirst($a['status'] ?? 'completed') }}
+                                    {{ ucfirst($a['status'] ?? 'approved') }}
                                 </span>
                             </td>
                             <td class="py-3 px-4 hidden md:table-cell text-gray-400">{{ $a['date']?->format('M d, Y') }}</td>

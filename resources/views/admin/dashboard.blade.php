@@ -26,7 +26,7 @@
         </div>
         <div class="bg-yellow-100 p-6 rounded-xl text-center">
           <i class="fa-solid fa-dollar-sign text-3xl text-yellow-600 mb-2"></i>
-          <div class="text-2xl font-bold text-yellow-800">₦ {{ number_format($admin_stats['total_earnings']) }}</div>
+          <div class="text-2xl font-bold text-yellow-800">$ {{ number_format($admin_stats['total_earnings']) }}</div>
           <div class="text-sm text-yellow-600">Total Earnings</div>
         </div>
         <div class="bg-red-100 p-6 rounded-xl text-center">
@@ -87,37 +87,66 @@
         </a>
       </div>
 
-      <!-- Recent Activity -->
+      <!-- Recent Activity (Optimized UI) -->
       <div class="mt-8">
         <h3 class="text-xl font-semibold mb-4">Recent Activity</h3>
-        <div class="bg-gray-50 p-4 rounded-xl">
-          <div class="space-y-3">
-            @if($recent_users->count() > 0)
-              @foreach($recent_users->take(3) as $user)
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- New Users -->
+          <div class="bg-gray-50 p-4 rounded-xl">
+            <div class="flex items-center justify-between mb-3">
+              <span class="font-semibold">New Users</span>
+              <i class="fa-solid fa-user-plus text-gray-400"></i>
+            </div>
+            <div class="space-y-3">
+              @forelse(($recent_users ?? collect())->take(3) as $user)
                 <div class="flex items-center justify-between">
-                  <span class="text-sm">New user registration: {{ $user->name }}</span>
-                  <span class="text-xs text-gray-500">{{ $user->created_at->diffForHumans() }}</span>
+                  <span class="text-sm truncate max-w-[70%]" title="{{ $user->name }}">{{ $user->name }}</span>
+                  <span class="text-xs text-gray-500">{{ optional($user->created_at)->diffForHumans() }}</span>
                 </div>
-              @endforeach
-            @endif
+              @empty
+                <div class="text-sm text-gray-500">No recent users</div>
+              @endforelse
+            </div>
+          </div>
 
-            @if($recent_withdrawals->count() > 0)
-              @foreach($recent_withdrawals->take(2) as $withdrawal)
+          <!-- Withdrawals -->
+          <div class="bg-gray-50 p-4 rounded-xl">
+            <div class="flex items-center justify-between mb-3">
+              <span class="font-semibold">Withdrawals</span>
+              <i class="fa-solid fa-money-bill-transfer text-gray-400"></i>
+            </div>
+            <div class="space-y-3">
+              @forelse(($recent_withdrawals ?? collect())->take(3) as $withdrawal)
                 <div class="flex items-center justify-between">
-                  <span class="text-sm">Withdrawal request: ₪{{ number_format($withdrawal->amount) }} - {{ $withdrawal->user->name }}</span>
+                  <span class="text-sm truncate max-w-[70%]" title="{{ optional($withdrawal->user)->name }}">
+                    ${{ number_format((float) $withdrawal->amount, 2) }} - {{ optional($withdrawal->user)->name ?? 'Unknown' }}
+                  </span>
                   <span class="text-xs text-gray-500">{{ optional($withdrawal->requested_at)->diffForHumans() }}</span>
                 </div>
-              @endforeach
-            @endif
+              @empty
+                <div class="text-sm text-gray-500">No recent withdrawals</div>
+              @endforelse
+            </div>
+          </div>
 
-            @if($recent_earnings->count() > 0)
-              @foreach($recent_earnings->take(2) as $earning)
+          <!-- Earnings -->
+          <div class="bg-gray-50 p-4 rounded-xl">
+            <div class="flex items-center justify-between mb-3">
+              <span class="font-semibold">Task Earnings</span>
+              <i class="fa-solid fa-coins text-gray-400"></i>
+            </div>
+            <div class="space-y-3">
+              @forelse(($recent_earnings ?? collect())->take(3) as $earning)
                 <div class="flex items-center justify-between">
-                  <span class="text-sm">Task completed: ₦ {{ number_format($earning->amount) }} - {{ $earning->user->name }}</span>
-                  <span class="text-xs text-gray-500">{{ $earning->created_at->diffForHumans() }}</span>
+                  <span class="text-sm truncate max-w-[70%]" title="{{ optional($earning->user)->name }}">
+                    ${{ number_format((float) $earning->amount, 2) }} - {{ optional($earning->user)->name ?? 'Unknown' }}
+                  </span>
+                  <span class="text-xs text-gray-500">{{ optional($earning->created_at)->diffForHumans() }}</span>
                 </div>
-              @endforeach
-            @endif
+              @empty
+                <div class="text-sm text-gray-500">No recent earnings</div>
+              @endforelse
+            </div>
           </div>
         </div>
       </div>

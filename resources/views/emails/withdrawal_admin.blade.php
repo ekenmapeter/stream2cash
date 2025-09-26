@@ -22,7 +22,7 @@
         <div class="card">
             <div class="h1">New Withdrawal Request</div>
             <div class="meta">User {{ $user->name }} ({{ $user->email }}) initiated a withdrawal.</div>
-            <div class="row"><span class="label">Amount</span><span>₦{{ number_format($withdrawal->amount, 2) }}</span></div>
+            <div class="row"><span class="label">Amount</span><span>${{ number_format($withdrawal->amount, 2) }}</span></div>
             <div class="row"><span class="label">Method</span><span>{{ $withdrawal->method }}</span></div>
             <div class="row"><span class="label">Requested</span><span>{{ \Illuminate\Support\Carbon::parse($withdrawal->requested_at)->format('M d, Y h:i A') }}</span></div>
             <div class="row"><span class="label">Bank</span><span>{{ data_get($withdrawal->account_details, 'bank_name') }}</span></div>

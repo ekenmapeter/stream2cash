@@ -81,7 +81,7 @@
                   </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    ₦ {{ number_format($user->balance, 2) }}
+                    $ {{ number_format($user->balance, 2) }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span class="px-2 py-1 text-xs font-semibold rounded-full

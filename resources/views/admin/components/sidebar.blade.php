@@ -8,9 +8,13 @@
       <i class="fa-solid fa-gauge mr-3"></i>
       <span>Dashboard</span>
     </a>
-    <a href="{{ route('admin.users') }}" class="flex items-center px-3 py-2 rounded hover:bg-gray-100 {{ request()->routeIs('admin.users*') ? 'bg-gray-100 font-semibold' : '' }}">
+    <a href="{{ route('admin.users') }}" class="flex items-center px-3 py-2 rounded hover:bg-gray-100 {{ request()->routeIs('admin.users*') && !request()->routeIs('admin.user-action-logs') ? 'bg-gray-100 font-semibold' : '' }}">
       <i class="fa-solid fa-users mr-3"></i>
       <span>Users</span>
+    </a>
+    <a href="{{ route('admin.user-action-logs') }}" class="flex items-center px-3 py-2 rounded hover:bg-gray-100 {{ request()->routeIs('admin.user-action-logs') ? 'bg-gray-100 font-semibold' : '' }}">
+      <i class="fa-solid fa-clipboard-list mr-3"></i>
+      <span>Action Logs</span>
     </a>
     <a href="{{ route('admin.tasks') }}" class="flex items-center px-3 py-2 rounded hover:bg-gray-100 {{ request()->routeIs('admin.tasks*') ? 'bg-gray-100 font-semibold' : '' }}">
       <i class="fa-solid fa-tasks mr-3"></i>

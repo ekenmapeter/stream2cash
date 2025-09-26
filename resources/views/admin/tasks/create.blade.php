@@ -19,7 +19,7 @@
       </div>
 
       <!-- Create Task Form -->
-      <form method="POST" action="{{ route('admin.tasks.store') }}" class="space-y-6">
+      <form method="POST" action="{{ route('admin.tasks.store') }}" class="space-y-6" enctype="multipart/form-data">
         @csrf
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -61,6 +61,16 @@
                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('url') border-red-500 @enderror"
                  placeholder="https://example.com/video" required>
           @error('url')
+            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+          @enderror
+        </div>
+
+        <div>
+          <label for="thumbnail" class="block text-sm font-medium text-gray-700 mb-2">Task Image (optional)</label>
+          <input type="file" id="thumbnail" name="thumbnail" accept="image/*"
+                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('thumbnail') border-red-500 @enderror">
+          <p class="text-xs text-gray-500 mt-1">Recommended 1280x720 or similar. Max 2MB.</p>
+          @error('thumbnail')
             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
           @enderror
         </div>

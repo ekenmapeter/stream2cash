@@ -13,8 +13,11 @@ use App\Services\SettingsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Mail\UserWithdrawalRequested;
 use App\Mail\AdminWithdrawalNotification;
+use App\Mail\UserVideoCompleted;
 use RealRashid\SweetAlert\Facades\Alert;
 
 class UserController extends Controller
@@ -82,7 +85,7 @@ class UserController extends Controller
             'balance' => $user->balance,
             'pending' => $user->withdrawals()->where('status', 'pending')->sum('amount'),
             'total_earned' => $user->earnings()->sum('amount'),
-            'total_withdrawn' => $user->withdrawals()->where('status', 'completed')->sum('amount')
+            'total_withdrawn' => $user->withdrawals()->where('status', 'approved')->sum('amount')
         ];
 
         $recent_withdrawals = $user->withdrawals()
@@ -218,6 +221,11 @@ class UserController extends Controller
             'allow_pausing' => $settingsService->isVideoPausingAllowed(),
             'countdown_duration' => $settingsService->getCountdownDuration(),
             'heartbeat_interval' => $settingsService->getHeartbeatInterval(),
+            // Provide additional anti-cheat limits so frontend matches backend validation
+            'min_watch_percentage' => $settingsService->getMinWatchPercentage(),
+            'max_seek_count' => $settingsService->getMaxSeekCount(),
+            'max_pause_count' => $settingsService->getMaxPauseCount(),
+            'require_tab_visible' => $settingsService->isTabVisibilityRequired(),
         ];
 
         return view('user.watch-task', compact('task', 'isYouTube', 'youtubeId', 'thumbnailUrl', 'videoSettings'));
@@ -251,7 +259,7 @@ class UserController extends Controller
                     'type' => 'earning',
                     'description' => 'Task reward',
                     'amount' => $e->amount,
-                    'status' => 'completed',
+                    'status' => 'approved',
                     'date' => $e->created_at,
                 ];
             });
@@ -387,7 +395,7 @@ class UserController extends Controller
         }
 
         // Atomically deduct balance and create withdrawal
-        $withdrawal = \DB::transaction(function () use ($user, $validated) {
+        $withdrawal = DB::transaction(function () use ($user, $validated) {
             $user->balance = (float)$user->balance - (float)$validated['amount'];
             if ($user->balance < 0) {
                 // Safety guard
@@ -420,7 +428,7 @@ class UserController extends Controller
             }
         } catch (\Throwable $e) {
             // Fail silently to not block the flow; logs will capture errors
-            \Log::error('Withdrawal email send failed: '.$e->getMessage());
+            Log::error('Withdrawal email send failed: '.$e->getMessage());
         }
 
         // Redirect to admin withdrawals page anchor (for convenience)
@@ -542,22 +550,13 @@ class UserController extends Controller
             $suspensionService = new SuspensionService();
             $suspension = $suspensionService->handleCheatingAttempt($user, $video, $cheatEvidence, $validationNotes);
 
-            // Log the invalid attempt
+            // Log the invalid attempt (only columns that exist)
             UserVideoWatch::create([
+                'uid' => (string) \Illuminate\Support\Str::uuid(),
                 'user_id' => $userId,
                 'video_id' => $videoId,
                 'watched_at' => now(),
                 'reward_earned' => 0,
-                'watch_duration' => $watchDuration,
-                'video_duration' => $videoDuration,
-                'watch_percentage' => $watchPercentage,
-                'seek_count' => $seekCount,
-                'pause_count' => $pauseCount,
-                'heartbeat_count' => $heartbeatCount,
-                'tab_visible' => $tabVisible,
-                'watch_events' => $request->input('watch_events'),
-                'is_valid' => false,
-                'validation_notes' => $validationNotes
             ]);
 
             // Check if user was auto-approved
@@ -582,41 +581,45 @@ class UserController extends Controller
 
         $pointsToAward = $video->reward_per_view;
 
-        // 5. Reward the user
-        $user->balance += $pointsToAward;
-        $user->save();
+        // 5-7. Atomically reward user, log watch, and create earning
+        DB::transaction(function () use ($user, $userId, $videoId, $pointsToAward) {
+            // Update wallet balance
+            $user->balance = (float) $user->balance + (float) $pointsToAward;
+            $user->save();
 
-        // 6. Log the completion with detailed tracking data
-        UserVideoWatch::create([
-            'user_id' => $userId,
-            'video_id' => $videoId,
-            'watched_at' => now(),
-            'reward_earned' => $pointsToAward,
-            'watch_duration' => $watchDuration,
-            'video_duration' => $videoDuration,
-            'watch_percentage' => $watchPercentage,
-            'seek_count' => $seekCount,
-            'pause_count' => $pauseCount,
-            'heartbeat_count' => $heartbeatCount,
-            'tab_visible' => $tabVisible,
-            'watch_events' => $request->input('watch_events'),
-            'is_valid' => true,
-            'validation_notes' => null
-        ]);
+            // Log minimal required fields to match migration
+            UserVideoWatch::create([
+                'uid' => (string) \Illuminate\Support\Str::uuid(),
+                'user_id' => $userId,
+                'video_id' => $videoId,
+                'watched_at' => now(),
+                'reward_earned' => $pointsToAward,
+            ]);
 
-        // 7. Create earning record
-        Earning::create([
-            'user_id' => $userId,
-            'video_id' => $videoId,
-            'amount' => $pointsToAward,
-            'type' => 'video_completion',
-        ]);
+            // Create earning record with valid enum type
+            Earning::create([
+                'uid' => (string) \Illuminate\Support\Str::uuid(),
+                'user_id' => $userId,
+                'video_id' => $videoId,
+                'amount' => $pointsToAward,
+                'type' => 'watch',
+            ]);
+        });
+
+        // Queue email notification (non-blocking)
+        try {
+            $videoFresh = Video::find($videoId);
+            Mail::to($user->email)->queue(new UserVideoCompleted($user->fresh(), $videoFresh, (float) $pointsToAward));
+        } catch (\Throwable $e) {
+            // Log and continue; do not block the response
+            Log::warning('UserVideoCompleted email queue failed: '.$e->getMessage(), ['userId' => $userId, 'videoId' => $videoId]);
+        }
 
         return response()->json([
             'success' => true,
             'points' => $pointsToAward,
             'message' => 'Points awarded successfully!',
-            'new_balance' => $user->balance
+            'new_balance' => $user->fresh()->balance
         ]);
     }
 

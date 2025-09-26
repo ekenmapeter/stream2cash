@@ -56,7 +56,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Reward Amount</label>
-                        <p class="mt-1 text-sm text-gray-900">₦{{ number_format($suspension->video->reward_per_view, 2) }}</p>
+                        <p class="mt-1 text-sm text-gray-900">${{ number_format($suspension->video->reward_per_view, 2) }}</p>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Video ID</label>
@@ -150,7 +150,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Amount Involved</label>
-                        <p class="mt-1 text-sm text-gray-900">₦{{ number_format($suspension->amount_involved, 2) }}</p>
+                        <p class="mt-1 text-sm text-gray-900">${{ number_format($suspension->amount_involved, 2) }}</p>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Wallet Credited</label>

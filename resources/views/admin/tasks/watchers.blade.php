@@ -183,7 +183,7 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div class="flex space-x-2">
-                    <button onclick="showWatchDetails({{ $watch->id }})" class="text-blue-600 hover:text-blue-900">
+                    <button onclick="showWatchDetails('{{ $watch->uid }}')" class="text-blue-600 hover:text-blue-900">
                       <i class="fa-solid fa-eye"></i>
                     </button>
 
@@ -211,10 +211,10 @@
 </div>
 
 <!-- Watch Details Modal -->
-<div id="watchDetailsModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+<div id="watchDetailsModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50" onclick="backdropClick(event)">
   <div class="flex items-center justify-center min-h-screen p-4">
-    <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-96 overflow-y-auto">
-      <div class="px-6 py-4 border-b border-gray-200">
+    <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-96 overflow-y-auto" onclick="event.stopPropagation()">
+      <div class="px-6 py-4 border-b border-gray-200 relative">
         <h3 class="text-lg font-semibold text-gray-900">Watch Details</h3>
         <button onclick="closeWatchDetails()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
           <i class="fa-solid fa-times"></i>
@@ -243,7 +243,7 @@ function updateSort(param, value) {
   window.location = url;
 }
 
-async function showWatchDetails(watchId) {
+async function showWatchDetails(watchKey) {
   const contentEl = document.getElementById('watchDetailsContent');
   contentEl.innerHTML = `
     <div class="text-center py-8">
@@ -254,7 +254,7 @@ async function showWatchDetails(watchId) {
   document.getElementById('watchDetailsModal').classList.remove('hidden');
 
   try {
-    const res = await fetch(`{{ url('admin/watches') }}/${watchId}`, {headers: {'X-Requested-With':'XMLHttpRequest'}});
+    const res = await fetch(`{{ url('admin/watches') }}/${encodeURIComponent(watchKey)}`, {headers: {'X-Requested-With':'XMLHttpRequest'}});
     const json = await res.json();
     if (!json.success) throw new Error('Failed to load');
     const d = json.data;
@@ -312,7 +312,25 @@ function closeWatchDetails() {
   document.getElementById('watchDetailsModal').classList.add('hidden');
 }
 
-async function creditReward(watchId) {
+function backdropClick(event) {
+  // If click lands on the backdrop container (not inner card), close
+  const modal = document.getElementById('watchDetailsModal');
+  if (event.target === modal) {
+    closeWatchDetails();
+  }
+}
+
+// Close on Escape key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    const modal = document.getElementById('watchDetailsModal');
+    if (!modal.classList.contains('hidden')) {
+      closeWatchDetails();
+    }
+  }
+});
+
+async function creditReward(watchKey) {
   if (!window.Swal) return;
   const confirmRes = await Swal.fire({
     title: 'Credit reward?',
@@ -324,7 +342,7 @@ async function creditReward(watchId) {
   if (!confirmRes.isConfirmed) return;
 
   try {
-    const res = await fetch(`{{ url('admin/watches') }}/${watchId}/credit`, {
+    const res = await fetch(`{{ url('admin/watches') }}/${encodeURIComponent(watchKey)}/credit`, {
       method: 'POST',
       headers: {
         'X-CSRF-TOKEN': `{{ csrf_token() }}`,

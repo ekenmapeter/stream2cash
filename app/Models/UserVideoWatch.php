@@ -3,14 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Concerns\HasUid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class UserVideoWatch extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUid;
 
     public $timestamps = false; // we only store watched_at
     protected $fillable = [
+        'uid',
         'user_id',
         'video_id',
         'watched_at',

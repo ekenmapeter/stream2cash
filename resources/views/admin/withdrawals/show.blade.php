@@ -27,13 +27,20 @@
               <span class="text-gray-600">Name:</span>
               <span class="font-medium">{{ $withdrawal->user->name }}</span>
             </div>
-            <div class="flex justify-between">
+            <div class="flex justify-between items-center">
               <span class="text-gray-600">Email:</span>
+              <div class="flex items-center space-x-2">
               <span class="font-medium">{{ $withdrawal->user->email }}</span>
+                <button onclick="copyToClipboard('{{ $withdrawal->user->email }}', this)"
+                        class="text-blue-600 hover:text-blue-800 transition-colors"
+                        title="Copy email">
+                  <i class="fa-solid fa-copy text-sm"></i>
+                </button>
+              </div>
             </div>
             <div class="flex justify-between">
               <span class="text-gray-600">Current Balance:</span>
-              <span class="font-medium text-green-600">₪{{ number_format($withdrawal->user->balance, 2) }}</span>
+              <span class="font-medium text-green-600">${{ number_format($withdrawal->user->balance, 2) }}</span>
             </div>
           </div>
         </div>
@@ -41,13 +48,20 @@
         <div class="bg-gray-50 p-6 rounded-xl">
           <h3 class="text-lg font-semibold mb-4">Withdrawal Details</h3>
           <div class="space-y-3">
-            <div class="flex justify-between">
+            <div class="flex justify-between items-center">
               <span class="text-gray-600">Amount:</span>
-              <span class="font-medium text-blue-600">₪{{ number_format($withdrawal->amount, 2) }}</span>
+              <div class="flex items-center space-x-2">
+                <span class="font-medium text-blue-600">${{ number_format($withdrawal->amount, 2) }}</span>
+                <button onclick="copyToClipboard('${{ number_format($withdrawal->amount, 2) }}', this)"
+                        class="text-blue-600 hover:text-blue-800 transition-colors"
+                        title="Copy amount">
+                  <i class="fa-solid fa-copy text-sm"></i>
+                </button>
+              </div>
             </div>
             <div class="flex justify-between">
               <span class="text-gray-600">Payment Method:</span>
-              <span class="font-medium">{{ ucfirst($withdrawal->payment_method ?? 'Bank Transfer') }}</span>
+              <span class="font-medium">{{ ucfirst($withdrawal->method ?? 'Bank Transfer') }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-gray-600">Status:</span>
@@ -70,12 +84,78 @@
         </div>
       </div>
 
-      <!-- Payment Details -->
-      @if($withdrawal->payment_details)
+      <!-- Bank Details -->
+      @if($withdrawal->account_details)
         <div class="bg-gray-50 p-6 rounded-xl mb-8">
-          <h3 class="text-lg font-semibold mb-4">Payment Details</h3>
+          <h3 class="text-lg font-semibold mb-4">Bank Details</h3>
           <div class="bg-white p-4 rounded-lg">
-            <pre class="whitespace-pre-wrap text-sm">{{ $withdrawal->payment_details }}</pre>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              @if(isset($withdrawal->account_details['bank_name']))
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600">Bank Name:</span>
+                  <div class="flex items-center space-x-2">
+                    <span class="font-medium">{{ $withdrawal->account_details['bank_name'] }}</span>
+                    <button onclick="copyToClipboard('{{ $withdrawal->account_details['bank_name'] }}', this)"
+                            class="text-blue-600 hover:text-blue-800 transition-colors"
+                            title="Copy bank name">
+                      <i class="fa-solid fa-copy text-sm"></i>
+                    </button>
+                  </div>
+                </div>
+              @endif
+              @if(isset($withdrawal->account_details['account_name']))
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600">Account Name:</span>
+                  <div class="flex items-center space-x-2">
+                    <span class="font-medium">{{ $withdrawal->account_details['account_name'] }}</span>
+                    <button onclick="copyToClipboard('{{ $withdrawal->account_details['account_name'] }}', this)"
+                            class="text-blue-600 hover:text-blue-800 transition-colors"
+                            title="Copy account name">
+                      <i class="fa-solid fa-copy text-sm"></i>
+                    </button>
+                  </div>
+                </div>
+              @endif
+              @if(isset($withdrawal->account_details['account_number']))
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600">Account Number:</span>
+                  <div class="flex items-center space-x-2">
+                    <span class="font-medium font-mono">{{ $withdrawal->account_details['account_number'] }}</span>
+                    <button onclick="copyToClipboard('{{ $withdrawal->account_details['account_number'] }}', this)"
+                            class="text-blue-600 hover:text-blue-800 transition-colors"
+                            title="Copy account number">
+                      <i class="fa-solid fa-copy text-sm"></i>
+                    </button>
+                  </div>
+                </div>
+              @endif
+              @if(isset($withdrawal->account_details['routing_number']))
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600">Routing Number:</span>
+                  <div class="flex items-center space-x-2">
+                    <span class="font-medium font-mono">{{ $withdrawal->account_details['routing_number'] }}</span>
+                    <button onclick="copyToClipboard('{{ $withdrawal->account_details['routing_number'] }}', this)"
+                            class="text-blue-600 hover:text-blue-800 transition-colors"
+                            title="Copy routing number">
+                      <i class="fa-solid fa-copy text-sm"></i>
+                    </button>
+                  </div>
+                </div>
+              @endif
+              @if(isset($withdrawal->account_details['swift_code']))
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600">SWIFT Code:</span>
+                  <div class="flex items-center space-x-2">
+                    <span class="font-medium font-mono">{{ $withdrawal->account_details['swift_code'] }}</span>
+                    <button onclick="copyToClipboard('{{ $withdrawal->account_details['swift_code'] }}', this)"
+                            class="text-blue-600 hover:text-blue-800 transition-colors"
+                            title="Copy SWIFT code">
+                      <i class="fa-solid fa-copy text-sm"></i>
+                    </button>
+                  </div>
+                </div>
+              @endif
+            </div>
           </div>
         </div>
       @endif
@@ -142,5 +222,36 @@
     </div>
   </section>
 </div>
+
+<script>
+function copyToClipboard(text, button) {
+    // Create a temporary textarea element
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    document.body.appendChild(textarea);
+
+    // Select and copy the text
+    textarea.select();
+    document.execCommand('copy');
+
+    // Remove the temporary element
+    document.body.removeChild(textarea);
+
+    // Change button icon to show success
+    const icon = button.querySelector('i');
+    const originalClass = icon.className;
+    icon.className = 'fa-solid fa-check text-sm text-green-600';
+
+    // Show success message
+    const originalTitle = button.title;
+    button.title = 'Copied!';
+
+    // Reset after 2 seconds
+    setTimeout(() => {
+        icon.className = originalClass;
+        button.title = originalTitle;
+    }, 2000);
+}
+</script>
 
 @endsection

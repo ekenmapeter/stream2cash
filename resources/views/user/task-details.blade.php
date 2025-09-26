@@ -20,7 +20,22 @@
                 <div class="bg-blue-800 rounded-xl shadow-lg overflow-hidden">
                     <!-- Task Thumbnail/Video Preview -->
                     <div class="relative">
-                        <img src="{{ $thumbnailUrl }}" alt="{{ $task->title }}" class="w-full h-64 object-cover">
+                        @php
+                            $fallbackThumb = 'https://placehold.co/640x360/0A1C64/FFFFFF?text=Task+Image';
+                            $thumb = $task->thumbnail ?: $fallbackThumb;
+                        @endphp
+                        <img
+                            src="{{ $thumb }}"
+                            alt="{{ $task->title }}"
+                            width="1280"
+                            height="720"
+                            loading="lazy"
+                            decoding="async"
+                            fetchpriority="high"
+                            class="w-full h-64 object-cover blur-sm"
+                            onload="this.classList.remove('blur-sm')"
+                            onerror="this.onerror=null;this.src='{{ $fallbackThumb }}'"
+                        >
                         @if($isCompleted)
                             <div class="absolute inset-0 bg-green-900 bg-opacity-80 flex items-center justify-center">
                                 <div class="text-center text-white">
@@ -45,10 +60,10 @@
                             </div>
                             <div class="text-right">
                                 @if($isCompleted)
-                                <div class="text-2xl font-bold text-green-500 px-2 py-1 bg-white rounded-lg">₦{{ number_format($task->reward_per_view, 2) }}</div>
+                                <div class="text-2xl font-bold text-green-500 px-2 py-1 bg-white rounded-lg">${{ number_format($task->reward_per_view, 2) }}</div>
 
                             @else
-                            <div class="text-3xl font-bold text-yellow-500">₦{{ number_format($task->reward_per_view, 2) }}</div>
+                            <div class="text-3xl font-bold text-yellow-500">${{ number_format($task->reward_per_view, 2) }}</div>
 
                             @endif
                                 <div class="text-sm text-gray-200">Reward per view</div>
@@ -91,7 +106,7 @@
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-gray-200">Total Rewards Paid</span>
-                            <span class=" bg-white px-2 py-1 rounded-lg font-semibold text-green-800">₦{{ number_format($task->watches()->sum('reward_earned'), 2) }}</span>
+                            <span class=" bg-white px-2 py-1 rounded-lg font-semibold text-green-800">${{ number_format($task->watches()->sum('reward_earned'), 2) }}</span>
                         </div>
                     </div>
                 </div>
@@ -104,12 +119,29 @@
                         @foreach($relatedTasks as $relatedTask)
                             @php $relatedCompleted = in_array($relatedTask->id, $completed_task_ids); @endphp
                             <div class="flex items-center space-x-3 p-3 rounded-lg {{ $relatedCompleted ? 'bg-blue-700' : 'bg-blue-700 hover:bg-blue-600' }} transition-colors">
-                                <img src="{{ $relatedTask->thumbnail_url ?? $relatedTask->thumbnail ?? 'https://placehold.co/80x60/0000FF/FFFFFF?text=Video' }}"
+                                @php
+                                    $rVideoUrl = $relatedTask->video_url ?? $relatedTask->url ?? '';
+                                    $rYtId = null;
+                                    if (preg_match('~(?:v=|youtu\.be/|/embed/)([\w-]{11})~', (string) $rVideoUrl, $rm)) {
+                                        $rYtId = $rm[1];
+                                    }
+                                    $rFallback = $rYtId ? "https://i.ytimg.com/vi/{$rYtId}/hqdefault.jpg" : 'https://placehold.co/160x120/0A1C64/FFFFFF?text=Video';
+                                    $rThumb = $relatedTask->thumbnail_url ?? $relatedTask->thumbnail ?? $rFallback;
+                                @endphp
+                                <img
+                                     src="{{ $rThumb }}"
                                      alt="{{ $relatedTask->title }}"
-                                     class="w-16 h-12 object-cover rounded">
+                                     width="160"
+                                     height="120"
+                                     loading="lazy"
+                                     decoding="async"
+                                     class="w-16 h-12 object-cover rounded blur-sm"
+                                     onload="this.classList.remove('blur-sm')"
+                                     onerror="this.onerror=null;this.src='{{ $rFallback }}'"
+                                >
                                 <div class="flex-1 min-w-0">
                                     <h4 class="text-sm font-medium text-white truncate">{{ $relatedTask->title }}</h4>
-                                    <p class="text-xs text-gray-400">₦{{ number_format($relatedTask->reward_per_view, 2) }}</p>
+                                    <p class="text-xs text-gray-400">${{ number_format($relatedTask->reward_per_view, 2) }}</p>
                                 </div>
                                 @if($relatedCompleted)
                                     <i class="fa-solid fa-check-circle text-green-400"></i>

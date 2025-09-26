@@ -19,6 +19,8 @@ class Withdrawal extends Model
         'method',
         'account_details',
         'status',
+        'admin_notes',
+        'processed_by',
         'requested_at',
         'processed_at',
     ];

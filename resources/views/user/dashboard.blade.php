@@ -18,7 +18,7 @@
                 <div class="bg-blue-800 p-6 rounded-xl flex items-center justify-between shadow-lg text-white">
                     <div>
                         <div class="text-sm text-blue-200">Wallet Balance</div>
-                        <div class="text-1xl mt-2 font-extrabold">₦{{ number_format($stats['wallet_balance']) }}</div>
+                        <div class="text-1xl mt-2 font-extrabold">${{ number_format($stats['wallet_balance']) }}</div>
                     </div>
                     <i class="text-4xl fa-solid fa-wallet text-blue-400 opacity-70"></i>
                 </div>
@@ -71,7 +71,7 @@
                                 <tr class="border-t border-blue-800 text-sm text-white">
                                     <td class="py-3 px-2">Earning</td>
                                     <td class="py-3 px-2">{{ $earning->source ?? 'Task Completion' }}</td>
-                                    <td class="py-3 px-2 text-right text-green-400 font-semibold">+₦{{ number_format($earning->amount, 2) }}</td>
+                                    <td class="py-3 px-2 text-right text-green-400 font-semibold">+${{ number_format($earning->amount, 2) }}</td>
                                     <td class="py-3 px-2 hidden sm:table-cell text-gray-400">{{ $earning->created_at->format('M d, Y') }}</td>
                                 </tr>
                             @empty
@@ -105,12 +105,12 @@
                         <tbody>
                             @forelse($recent_withdrawals as $withdrawal)
                                 <tr class="border-t border-blue-800 text-sm text-white">
-                                    <td class="py-3 px-2 font-semibold">₦{{ number_format($withdrawal->amount, 2) }}</td>
+                                    <td class="py-3 px-2 font-semibold">${{ number_format($withdrawal->amount, 2) }}</td>
                                     <td class="py-3 px-2">{{ $withdrawal->method }}</td>
-                                    <td class="py-3 px-2 hidden sm:table-cell text-gray-400">{{ $withdrawal->created_at->format('M d, Y') }}</td>
+                                    <td class="py-3 px-2 hidden sm:table-cell text-gray-400">{{ optional($withdrawal->requested_at)->diffForHumans() }}</td>
                                     <td class="py-3 px-2 text-right">
                                         <span class="px-2 py-1 rounded-full text-xs font-medium
-                                            {{ $withdrawal->status === 'completed' ? 'bg-green-700 text-green-100' :
+                                            {{ $withdrawal->status === 'approved' ? 'bg-green-700 text-green-100' :
                                                ($withdrawal->status === 'pending' ? 'bg-yellow-700 text-yellow-100' : 'bg-red-700 text-red-100') }}">
                                             {{ ucfirst($withdrawal->status) }}
                                         </span>
@@ -143,7 +143,7 @@
                             <div class="text-sm font-semibold text-blue-700">{{ $task->title }}</div>
                             <p class="text-xs text-gray-700 mt-1">{{ Str::limit($task->description, 50) }}</p>
                             <div class="flex items-center justify-between mt-2">
-                                <span class="text-sm text-yellow-500 font-bold">₦{{ number_format($task->reward_per_view, 2) }}</span>
+                                <span class="text-sm text-yellow-500 font-bold">${{ number_format($task->reward_per_view, 2) }}</span>
                                 @if(in_array($task->id, $user_completed_tasks->pluck('video_id')->toArray()))
                                     <span class="text-xs text-green-600 font-semibold">Completed</span>
                                 @else
